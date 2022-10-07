@@ -15,8 +15,8 @@
 
 int
 sv_curv_col_ac_iso_onestage(
-             float *restrict w_cur,
-             float *restrict rhs, 
+             float *__restrict__ w_cur,
+             float *__restrict__ rhs, 
              wav_t  *wav,
              gd_t   *gd,
              gdcurv_metric_t  *metric,
@@ -31,59 +31,59 @@ sv_curv_col_ac_iso_onestage(
 
 int
 sv_curv_col_ac_iso_rhs_inner(
-             float *restrict  Vx , float *restrict  Vz ,
-             float *restrict  P, 
-             float *restrict hVx , float *restrict hVz ,
-             float *restrict hP, 
-             float *restrict xi_x, float *restrict xi_z,
-             float *restrict zt_x, float *restrict zt_z,
-             float *restrict kappa3d, float *restrict slw3d,
+             float *__restrict__  Vx , float *__restrict__  Vz ,
+             float *__restrict__  P, 
+             float *__restrict__ hVx , float *__restrict__ hVz ,
+             float *__restrict__ hP, 
+             float *__restrict__ xi_x, float *__restrict__ xi_z,
+             float *__restrict__ zt_x, float *__restrict__ zt_z,
+             float *__restrict__ kappa3d, float *__restrict__ slw3d,
              int ni1, int ni2, int nk1, int nk2,
              size_t siz_line,
-             int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-             int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+             int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+             int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
              const int verbose);
 
 int
 sv_curv_col_ac_iso_rhs_timg_z2(
-             float *restrict  P,
+             float *__restrict__  P,
              int ni1, int ni2, int nk1, int nk2, int nz,
              size_t siz_line, 
              const int verbose);
 
 int
 sv_curv_col_ac_iso_rhs_vlow_z2(
-             float *restrict  Vx , float *restrict  Vz ,
-             float *restrict hP, 
-             float *restrict xi_x, float *restrict xi_z,
-             float *restrict zt_x, float *restrict zt_z,
-             float *restrict kappa3d, float *restrict slw3d,
+             float *__restrict__  Vx , float *__restrict__  Vz ,
+             float *__restrict__ hP, 
+             float *__restrict__ xi_x, float *__restrict__ xi_z,
+             float *__restrict__ zt_x, float *__restrict__ zt_z,
+             float *__restrict__ kappa3d, float *__restrict__ slw3d,
              int ni1, int ni2, int nk1, int nk2,
              size_t siz_line,
-             int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
+             int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
              int num_of_fdz_op, fd_op_t *fdz_op, int fdz_max_len,
              const int verbose);
 
 int
 sv_curv_col_ac_iso_rhs_cfspml(
-               float *restrict  Vx , float *restrict  Vz ,
-               float *restrict  P, 
-               float *restrict hVx , float *restrict hVz ,
-               float *restrict hP,
-               float *restrict xi_x, float *restrict xi_z,
-               float *restrict zt_x, float *restrict zt_z,
-               float *restrict kappa3d, float *restrict slw3d,
+               float *__restrict__  Vx , float *__restrict__  Vz ,
+               float *__restrict__  P, 
+               float *__restrict__ hVx , float *__restrict__ hVz ,
+               float *__restrict__ hP,
+               float *__restrict__ xi_x, float *__restrict__ xi_z,
+               float *__restrict__ zt_x, float *__restrict__ zt_z,
+               float *__restrict__ kappa3d, float *__restrict__ slw3d,
                int nk2, size_t siz_line,
-               int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-               int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+               int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+               int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                bdry_t *bdry,
                const int verbose);
 
 int
 sv_curv_col_ac_iso_rhs_src(
-               float *restrict hVx , float *restrict hVz ,
-               float *restrict hP, 
-               float *restrict jac3d, float *restrict slw3d,
+               float *__restrict__ hVx , float *__restrict__ hVz ,
+               float *__restrict__ hP, 
+               float *__restrict__ jac3d, float *__restrict__ slw3d,
                src_t *src, // short nation for reference member
                const int verbose);
 

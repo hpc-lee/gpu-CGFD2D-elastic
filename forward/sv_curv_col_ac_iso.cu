@@ -17,8 +17,8 @@
 
 int
 sv_curv_col_ac_iso_onestage(
-            float *restrict w_cur,
-            float *restrict rhs, 
+            float *__restrict__ w_cur,
+            float *__restrict__ rhs, 
             wav_t  *wav,
             gd_t   *gd,
             gdcurv_metric_t  *metric,
@@ -32,21 +32,21 @@ sv_curv_col_ac_iso_onestage(
             const int verbose)
 {
   // local pointer get each vars
-  float *restrict Vx    = w_cur + wav->Vx_pos ;
-  float *restrict Vz    = w_cur + wav->Vz_pos ;
-  float *restrict P     = w_cur + wav->Txx_pos;
-  float *restrict hVx   = rhs   + wav->Vx_pos ; 
-  float *restrict hVz   = rhs   + wav->Vz_pos ; 
-  float *restrict hP    = rhs   + wav->Txx_pos; 
+  float *__restrict__ Vx    = w_cur + wav->Vx_pos ;
+  float *__restrict__ Vz    = w_cur + wav->Vz_pos ;
+  float *__restrict__ P     = w_cur + wav->Txx_pos;
+  float *__restrict__ hVx   = rhs   + wav->Vx_pos ; 
+  float *__restrict__ hVz   = rhs   + wav->Vz_pos ; 
+  float *__restrict__ hP    = rhs   + wav->Txx_pos; 
 
-  float *restrict xi_x  = metric->xi_x;
-  float *restrict xi_z  = metric->xi_z;
-  float *restrict zt_x  = metric->zeta_x;
-  float *restrict zt_z  = metric->zeta_z;
-  float *restrict jac3d = metric->jac;
+  float *__restrict__ xi_x  = metric->xi_x;
+  float *__restrict__ xi_z  = metric->xi_z;
+  float *__restrict__ zt_x  = metric->zeta_x;
+  float *__restrict__ zt_z  = metric->zeta_z;
+  float *__restrict__ jac3d = metric->jac;
 
-  float *restrict kappa3d = md->kappa;
-  float *restrict slw3d = md->rho;
+  float *__restrict__ kappa3d = md->kappa;
+  float *__restrict__ slw3d = md->rho;
 
   // grid size
   int ni1 = gd->ni1;
@@ -62,11 +62,11 @@ sv_curv_col_ac_iso_onestage(
 
   // local fd op
   int              fdx_inn_len;
-  int    *restrict fdx_inn_indx;
-  float  *restrict fdx_inn_coef;
+  int    *__restrict__ fdx_inn_indx;
+  float  *__restrict__ fdx_inn_coef;
   int              fdz_inn_len;
-  int    *restrict fdz_inn_indx;
-  float  *restrict fdz_inn_coef;
+  int    *__restrict__ fdz_inn_indx;
+  float  *__restrict__ fdz_inn_coef;
 
   // for get a op from 1d array, currently use num_of_fdz_op as index
   // length, index, coef of a op
@@ -147,17 +147,17 @@ sv_curv_col_ac_iso_onestage(
 
 int
 sv_curv_col_ac_iso_rhs_inner(
-              float *restrict  Vx , float *restrict  Vz ,
-              float *restrict  P, 
-              float *restrict hVx , float *restrict hVz ,
-              float *restrict hP, 
-              float *restrict xi_x, float *restrict xi_z,
-              float *restrict zt_x, float *restrict zt_z,
-              float *restrict kappa3d, float *restrict slw3d,
+              float *__restrict__  Vx , float *__restrict__  Vz ,
+              float *__restrict__  P, 
+              float *__restrict__ hVx , float *__restrict__ hVz ,
+              float *__restrict__ hP, 
+              float *__restrict__ xi_x, float *__restrict__ xi_z,
+              float *__restrict__ zt_x, float *__restrict__ zt_z,
+              float *__restrict__ kappa3d, float *__restrict__ slw3d,
               int ni1, int ni2, int nk1, int nk2,
               size_t siz_line,
-              int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-              int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+              int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+              int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
               const int verbose)
 {
   // use local stack array for speedup
@@ -175,9 +175,9 @@ sv_curv_col_ac_iso_rhs_inner(
   float kappa,slw;
   float xix,xiz,ztx,ztz;
 
-  float *restrict Vx_ptr;
-  float *restrict Vz_ptr;
-  float *restrict P_ptr;
+  float *__restrict__ Vx_ptr;
+  float *__restrict__ Vz_ptr;
+  float *__restrict__ P_ptr;
 
   // put fd op into local array
   for (int i=0; i < fdx_len; i++) {
@@ -251,7 +251,7 @@ sv_curv_col_ac_iso_rhs_inner(
 
 int
 sv_curv_col_ac_iso_rhs_timg_z2(
-               float *restrict  P,
+               float *__restrict__  P,
                int ni1, int ni2, int nk1, int nk2, int nz,
                size_t siz_line,
                const int verbose)
@@ -289,14 +289,14 @@ sv_curv_col_ac_iso_rhs_timg_z2(
 
 int
 sv_curv_col_ac_iso_rhs_vlow_z2(
-               float *restrict  Vx , float *restrict  Vz ,
-               float *restrict hP, 
-               float *restrict xi_x, float *restrict xi_z,
-               float *restrict zt_x, float *restrict zt_z,
-               float *restrict kappa3d, float *restrict slw3d,
+               float *__restrict__  Vx , float *__restrict__  Vz ,
+               float *__restrict__ hP, 
+               float *__restrict__ xi_x, float *__restrict__ xi_z,
+               float *__restrict__ zt_x, float *__restrict__ zt_z,
+               float *__restrict__ kappa3d, float *__restrict__ slw3d,
                int ni1, int ni2, int nk1, int nk2,
                size_t siz_line,
-               int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
+               int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                int num_of_fdz_op, fd_op_t *fdz_op, int fdz_max_len,
                const int verbose)
 {
@@ -394,16 +394,16 @@ sv_curv_col_ac_iso_rhs_vlow_z2(
 
 int
 sv_curv_col_ac_iso_rhs_cfspml(
-               float *restrict  Vx , float *restrict  Vz ,
-               float *restrict  P, 
-               float *restrict hVx , float *restrict hVz ,
-               float *restrict hP,
-               float *restrict xi_x, float *restrict xi_z,
-               float *restrict zt_x, float *restrict zt_z,
-               float *restrict kappa3d, float *restrict slw3d,
+               float *__restrict__  Vx , float *__restrict__  Vz ,
+               float *__restrict__  P, 
+               float *__restrict__ hVx , float *__restrict__ hVz ,
+               float *__restrict__ hP,
+               float *__restrict__ xi_x, float *__restrict__ xi_z,
+               float *__restrict__ zt_x, float *__restrict__ zt_z,
+               float *__restrict__ kappa3d, float *__restrict__ slw3d,
                int nk2, size_t siz_line,
-               int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-               int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+               int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+               int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                bdry_t *bdry,
                const int verbose)
 {
@@ -453,23 +453,23 @@ sv_curv_col_ac_iso_rhs_cfspml(
       int abs_nk2 = bdry->nk2[idim][iside];
 
       // get coef for this face
-      float *restrict ptr_coef_A = bdry->A[idim][iside];
-      float *restrict ptr_coef_B = bdry->B[idim][iside];
-      float *restrict ptr_coef_D = bdry->D[idim][iside];
+      float *__restrict__ ptr_coef_A = bdry->A[idim][iside];
+      float *__restrict__ ptr_coef_B = bdry->B[idim][iside];
+      float *__restrict__ ptr_coef_D = bdry->D[idim][iside];
 
       bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
 
       // get pml vars
-      float *restrict abs_vars_cur = auxvar->cur;
-      float *restrict abs_vars_rhs = auxvar->rhs;
+      float *__restrict__ abs_vars_cur = auxvar->cur;
+      float *__restrict__ abs_vars_rhs = auxvar->rhs;
 
-      float *restrict pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
-      float *restrict pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
-      float *restrict pml_P    = abs_vars_cur + auxvar->Txx_pos;
+      float *__restrict__ pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
+      float *__restrict__ pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
+      float *__restrict__ pml_P    = abs_vars_cur + auxvar->Txx_pos;
 
-      float *restrict pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
-      float *restrict pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
-      float *restrict pml_hP   = abs_vars_rhs + auxvar->Txx_pos;
+      float *__restrict__ pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
+      float *__restrict__ pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
+      float *__restrict__ pml_hP   = abs_vars_rhs + auxvar->Txx_pos;
 
       // for each dim
       if (idim == 0 ) // x direction
@@ -591,9 +591,9 @@ sv_curv_col_ac_iso_rhs_cfspml(
 
 int
 sv_curv_col_ac_iso_rhs_src(
-             float *restrict hVx , float *restrict hVz ,
-             float *restrict hP, 
-             float *restrict jac3d, float *restrict slw3d,
+             float *__restrict__ hVx , float *__restrict__ hVz ,
+             float *__restrict__ hP, 
+             float *__restrict__ jac3d, float *__restrict__ slw3d,
              src_t *src, // short nation for reference member
              const int verbose)
 {

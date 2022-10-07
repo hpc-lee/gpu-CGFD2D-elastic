@@ -151,7 +151,7 @@ wav_ac_init(gd_t *gd,
 }
 
 int
-wav_check_value(float *restrict w, wav_t *wav)
+wav_check_value(float *__restrict__ w, wav_t *wav)
 {
   int ierr = 0;
 
@@ -173,13 +173,13 @@ wav_check_value(float *restrict w, wav_t *wav)
 }
 
 int
-wav_zero_edge(gd_t *gd, wav_t *wav, float *restrict w4d)
+wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
 {
   int ierr = 0;
 
   for (int icmp=0; icmp < wav->ncmp; icmp++)
   {
-    float *restrict var = w4d + wav->cmp_pos[icmp];
+    float *__restrict__ var = w4d + wav->cmp_pos[icmp];
 
     // z1
     for (int k=0; k < gd->nk1; k++)

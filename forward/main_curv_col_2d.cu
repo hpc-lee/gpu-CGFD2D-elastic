@@ -113,41 +113,42 @@ int main(int argc, char** argv)
   // generate grid coord
   switch (par->grid_generation_itype)
   {
-    case PAR_GRID_CARTESIAN :
+    case PAR_GRID_CARTESIAN : {
 
-        fprintf(stdout,"generate cartesian grid in code ...\n"); 
+      fprintf(stdout,"generate cartesian grid in code ...\n"); 
 
-        float dx = par->cartesian_grid_stepsize[0];
-        float dz = par->cartesian_grid_stepsize[1];
+      float dx = par->cartesian_grid_stepsize[0];
+      float dz = par->cartesian_grid_stepsize[1];
 
-        float x0 = par->cartesian_grid_origin[0];
-        float z0 = par->cartesian_grid_origin[1];
+      float x0 = par->cartesian_grid_origin[0];
+      float z0 = par->cartesian_grid_origin[1];
 
-        gd_curv_gen_cart(gdcurv,dx,x0,dz,z0);
-
-        break;
-
-    case PAR_GRID_IMPORT :
-
-        fprintf(stdout,"import grid vars ...\n"); 
-        gd_curv_coord_import(gdcurv, par->grid_import_dir);
-
-        break;
-
-    case PAR_GRID_LAYER_INTERP :
-
-        fprintf(stdout,"gerate grid using layer interp ...\n"); 
-
-        gd_curv_gen_layer(par->in_grid_layer_file,
-							par->grid_layer_resample_factor,
-							par->grid_layer_start,
-							par->number_of_total_grid_points_x,
-							par->number_of_total_grid_points_z,
-							gdcurv->x2d,  gdcurv->z2d,
-							gdcurv->nx, gdcurv->ni, gdcurv->gni1, fd->fdx_nghosts,
-							gdcurv->nz, gdcurv->nk, gdcurv->gnk1, fd->fdz_nghosts);
+      gd_curv_gen_cart(gdcurv,dx,x0,dz,z0);
 
       break;
+    }
+    case PAR_GRID_IMPORT : {
+
+      fprintf(stdout,"import grid vars ...\n"); 
+      gd_curv_coord_import(gdcurv, par->grid_import_dir);
+
+      break;
+    }
+    case PAR_GRID_LAYER_INTERP : {
+
+      fprintf(stdout,"gerate grid using layer interp ...\n"); 
+
+      gd_curv_gen_layer(par->in_grid_layer_file,
+						par->grid_layer_resample_factor,
+						par->grid_layer_start,
+						par->number_of_total_grid_points_x,
+						par->number_of_total_grid_points_z,
+						gdcurv->x2d,  gdcurv->z2d,
+						gdcurv->nx, gdcurv->ni, gdcurv->gni1, fd->fdx_nghosts,
+						gdcurv->nz, gdcurv->nk, gdcurv->gnk1, fd->fdz_nghosts);
+
+      break;
+    }
   }
 
   // cal min/max of this thread
@@ -170,23 +171,24 @@ int main(int argc, char** argv)
   // cal metrics and output for QC
   switch (par->metric_method_itype)
   {
-    case PAR_METRIC_CALCULATE :
+    case PAR_METRIC_CALCULATE : {
 
-        if (verbose>0) fprintf(stdout,"calculate metrics ...\n"); 
-        gd_curv_metric_cal(gdcurv,
-                           gdcurv_metric,
-                           fd->fdc_len,
-                           fd->fdc_indx,
-                           fd->fdc_coef);
+      if (verbose>0) fprintf(stdout,"calculate metrics ...\n"); 
+      gd_curv_metric_cal(gdcurv,
+                         gdcurv_metric,
+                         fd->fdc_len,
+                         fd->fdc_indx,
+                         fd->fdc_coef);
 
-        break;
+      break;
+    }
+    case PAR_METRIC_IMPORT : {
 
-    case PAR_METRIC_IMPORT :
+      if (verbose>0) fprintf(stdout,"import metric file ...\n"); 
+      gd_curv_metric_import(gdcurv_metric, par->grid_import_dir);
 
-        if (verbose>0) fprintf(stdout,"import metric file ...\n"); 
-        gd_curv_metric_import(gdcurv_metric, par->grid_import_dir);
-
-        break;
+      break;
+    }
   }
   if (verbose>0) { fprintf(stdout, " --> done\n"); fflush(stdout); }
 
@@ -212,7 +214,7 @@ int main(int argc, char** argv)
   // read or discrete velocity model
   switch (par->media_input_itype)
   {
-    case PAR_MEDIA_CODE :
+    case PAR_MEDIA_CODE : {
 
         if (verbose>0) fprintf(stdout,"generate simple medium in code ...\n"); 
 
@@ -237,13 +239,14 @@ int main(int argc, char** argv)
         }
 
         break;
-
-    case PAR_MEDIA_IMPORT :
+    }
+    case PAR_MEDIA_IMPORT : {
         if (verbose>0) fprintf(stdout,"import discrete medium file ...\n"); 
         md_import(md, par->grid_import_dir);
 
         break;
-
+    }
+    /*
     case PAR_MEDIA_2LAY : {
         if (verbose>0) fprintf(stdout,"read and discretize layer medium file ...\n"); 
 
@@ -323,6 +326,7 @@ int main(int argc, char** argv)
 
         break;
     }
+    */
   }
 
   // export grid media

@@ -54,11 +54,11 @@ drv_rk_curv_col_allstep(
   char ou_file[CONST_MAX_STRLEN];
 
   // local pointer
-  float *restrict w_cur;
-  float *restrict w_pre;
-  float *restrict w_rhs;
-  float *restrict w_end;
-  float *restrict w_tmp;
+  float *__restrict__ w_cur;
+  float *__restrict__ w_pre;
+  float *__restrict__ w_rhs;
+  float *__restrict__ w_end;
+  float *__restrict__ w_tmp;
 
   int   ipair, istage;
   float t_cur;

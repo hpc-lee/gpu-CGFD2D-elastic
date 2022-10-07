@@ -51,11 +51,11 @@ wav_init(gd_t *gd,
          int number_of_levels);
 
 int
-wav_check_value(float *restrict w, wav_t *wav);
+wav_check_value(float *__restrict__ w, wav_t *wav);
 
 int
 wav_zero_edge(gd_t *gd, wav_t *wav,
-              float *restrict w4d);
+              float *__restrict__ w4d);
 
 int 
 wav_ac_init(gd_t *gd,

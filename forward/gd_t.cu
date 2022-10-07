@@ -142,7 +142,7 @@ gd_curv_metric_init(gd_t        *gdcurv,
 void
 gd_curv_metric_cal(gd_t        *gdcurv,
                    gdcurv_metric_t *metric,
-                   int fd_len, int *restrict fd_indx, float *restrict fd_coef)
+                   int fd_len, int *__restrict__ fd_indx, float *__restrict__ fd_coef)
 {
   int ni1 = gdcurv->ni1;
   int ni2 = gdcurv->ni2;
@@ -153,13 +153,13 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   size_t siz_line  = gdcurv->siz_line;
 
   // point to each var
-  float *restrict x2d  = gdcurv->x2d;
-  float *restrict z2d  = gdcurv->z2d;
-  float *restrict jac2d= metric->jac;
-  float *restrict xi_x = metric->xi_x;
-  float *restrict xi_z = metric->xi_z;
-  float *restrict zt_x = metric->zeta_x;
-  float *restrict zt_z = metric->zeta_z;
+  float *__restrict__ x2d  = gdcurv->x2d;
+  float *__restrict__ z2d  = gdcurv->z2d;
+  float *__restrict__ jac2d= metric->jac;
+  float *__restrict__ xi_x = metric->xi_x;
+  float *__restrict__ xi_z = metric->xi_z;
+  float *__restrict__ zt_x = metric->zeta_x;
+  float *__restrict__ zt_z = metric->zeta_z;
 
   float x_xi, x_zt;
   float z_xi, z_zt;
@@ -362,8 +362,8 @@ void
 gd_curv_coord_export(gd_t *gdcurv,
                      char *output_dir)
 {
-  size_t *restrict c3d_pos   = gdcurv->cmp_pos;
-  char  **restrict c3d_name  = gdcurv->cmp_name;
+  size_t *__restrict__ c3d_pos   = gdcurv->cmp_pos;
+  char  **__restrict__ c3d_name  = gdcurv->cmp_name;
   int number_of_vars = gdcurv->ncmp;
   int  nx = gdcurv->nx;
   int  nz = gdcurv->nz;
@@ -534,8 +534,8 @@ gd_curv_metric_export(gd_t        *gd,
                       gdcurv_metric_t *metric,
                       char *output_dir)
 {
-  size_t *restrict g3d_pos   = metric->cmp_pos;
-  char  **restrict g3d_name  = metric->cmp_name;
+  size_t *__restrict__ g3d_pos   = metric->cmp_pos;
+  char  **__restrict__ g3d_name  = metric->cmp_name;
   int  number_of_vars = metric->ncmp;
   int  nx = metric->nx;
   int  nz = metric->nz;
@@ -649,8 +649,8 @@ gd_curv_gen_layer(char *in_grid_layer_file,
                       int *grid_layer_start,
                       int n_total_grid_x,
                       int n_total_grid_z,
-                      float *restrict x2d,
-                      float *restrict z2d,
+                      float *__restrict__ x2d,
+                      float *__restrict__ z2d,
                       int nx, int ni, int gni1, int fdx_nghosts, 
                       int nz, int nk, int gnk1, int fdz_nghosts)
 {
@@ -1255,8 +1255,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   int nk2 = gd->nk2;
   size_t siz_line = gd->siz_line;
 
-  float *restrict x3d = gd->x2d;
-  float *restrict z3d = gd->z2d;
+  float *__restrict__ x3d = gd->x2d;
+  float *__restrict__ z3d = gd->z2d;
 
   // outside coord range
   if ( sx < gd->xmin || sx > gd->xmax ||

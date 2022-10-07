@@ -11,24 +11,24 @@
 
 int
 sv_curv_col_el_rhs_timg_z2(
-             float *restrict  Txx, float *restrict  Tzz,
-             float *restrict  Txz, 
-             float *restrict hVx , float *restrict hVz ,
-             float *restrict xi_x, float *restrict xi_z,
-             float *restrict zt_x, float *restrict zt_z,
-             float *restrict jac3d, float *restrict slw3d,
+             float *__restrict__  Txx, float *__restrict__  Tzz,
+             float *__restrict__  Txz, 
+             float *__restrict__ hVx , float *__restrict__ hVz ,
+             float *__restrict__ xi_x, float *__restrict__ xi_z,
+             float *__restrict__ zt_x, float *__restrict__ zt_z,
+             float *__restrict__ jac3d, float *__restrict__ slw3d,
              int ni1, int ni2, int nk1, int nk2,
              size_t siz_line,
-             int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-             int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+             int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+             int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
              const int verbose);
 
 int
 sv_curv_col_el_rhs_src(
-             float *restrict hVx , float *restrict hVz ,
-             float *restrict hTxx, float *restrict hTzz,
-             float *restrict hTxz, 
-             float *restrict jac3d, float *restrict slw3d,
+             float *__restrict__ hVx , float *__restrict__ hVz ,
+             float *__restrict__ hTxx, float *__restrict__ hTzz,
+             float *__restrict__ hTxz, 
+             float *__restrict__ jac3d, float *__restrict__ slw3d,
              src_t *src, // short nation for reference member
              const int verbose);
 

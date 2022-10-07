@@ -481,8 +481,8 @@ io_snap_nc_put(iosnap_t *iosnap,
                iosnap_nc_t *iosnap_nc,
                gd_t    *gd,
                wav_t   *wav,
-               float *restrict w4d,
-               float *restrict buff,
+               float *__restrict__ w4d,
+               float *__restrict__ buff,
                int   nt_total,
                int   it,
                float time,
@@ -660,8 +660,8 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
                iosnap_nc_t *iosnap_nc,
                gd_t    *gd,
                wav_t   *wav,
-               float *restrict w4d,
-               float *restrict buff,
+               float *__restrict__ w4d,
+               float *__restrict__ buff,
                int   nt_total,
                int   it,
                float time,
@@ -744,7 +744,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
 }
 
 int
-io_snap_pack_buff(float *restrict var,
+io_snap_pack_buff(float *__restrict__ var,
                   size_t siz_line,
                   int starti,
                   int counti,
@@ -752,7 +752,7 @@ io_snap_pack_buff(float *restrict var,
                   int startk,
                   int countk,
                   int increk,
-                  float *restrict buff)
+                  float *__restrict__ buff)
 {
   int iptr_snap=0;
   for (int n3=0; n3<countk; n3++)
@@ -781,7 +781,7 @@ io_snap_nc_close(iosnap_nc_t *iosnap_nc)
 }
 
 int
-io_recv_keep(iorecv_t *iorecv, float *restrict w4d,
+io_recv_keep(iorecv_t *iorecv, float *__restrict__ w4d,
              int it, int ncmp, int siz_slice)
 {
   float Lx1, Lx2, Ly1, Ly2, Lz1, Lz2;
@@ -810,7 +810,7 @@ io_recv_keep(iorecv_t *iorecv, float *restrict w4d,
 }
 
 int
-io_line_keep(ioline_t *ioline, float *restrict w4d,
+io_line_keep(ioline_t *ioline, float *__restrict__ w4d,
              int it, int ncmp, int siz_slice)
 {
   for (int n=0; n < ioline->num_of_lines; n++)
@@ -924,8 +924,8 @@ int io_line_output_sac(ioline_t *ioline,
 
 int
 io_recv_output_sac_el_iso_strain(iorecv_t *iorecv,
-                     float *restrict lam3d,
-                     float *restrict mu3d,
+                     float *__restrict__ lam3d,
+                     float *__restrict__ mu3d,
                      float dt,
                      char *evtnm,
                      char *output_dir,

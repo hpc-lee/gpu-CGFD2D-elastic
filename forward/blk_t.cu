@@ -178,8 +178,8 @@ blk_dt_esti_curv(gd_t *gdcurv, md_t *md,
   float dtmax_local = 1.0e10;
   float Vp;
 
-  float *restrict x2d = gdcurv->x2d;
-  float *restrict z2d = gdcurv->z2d;
+  float *__restrict__ x2d = gdcurv->x2d;
+  float *__restrict__ z2d = gdcurv->z2d;
 
   for (int k = gdcurv->nk1; k <= gdcurv->nk2; k++)
   {

@@ -11,16 +11,16 @@
 #include "fdlib_math.h"
 #include "blk_t.h"
 #include "sv_curv_col_el.h"
-#include "sv_curv_col_el_aniso.h"
+#include "sv_curv_col_el_vti.h"
 
 /*******************************************************************************
  * perform one stage calculation of rhs
  ******************************************************************************/
 
 int
-sv_curv_col_el_aniso_onestage(
-               float *restrict w_cur,
-               float *restrict rhs, 
+sv_curv_col_el_vti_onestage(
+               float *__restrict__ w_cur,
+               float *__restrict__ rhs, 
                wav_t  *wav,
                gd_t   *gd,
                gdcurv_metric_t  *metric,
@@ -34,30 +34,28 @@ sv_curv_col_el_aniso_onestage(
                const int verbose)
 {
   // local pointer get each vars
-  float *restrict Vx    = w_cur + wav->Vx_pos ;
-  float *restrict Vz    = w_cur + wav->Vz_pos ;
-  float *restrict Txx   = w_cur + wav->Txx_pos;
-  float *restrict Tzz   = w_cur + wav->Tzz_pos;
-  float *restrict Txz   = w_cur + wav->Txz_pos;
-  float *restrict hVx   = rhs   + wav->Vx_pos ; 
-  float *restrict hVz   = rhs   + wav->Vz_pos ; 
-  float *restrict hTxx  = rhs   + wav->Txx_pos; 
-  float *restrict hTzz  = rhs   + wav->Tzz_pos; 
-  float *restrict hTxz  = rhs   + wav->Txz_pos; 
+  float *__restrict__ Vx    = w_cur + wav->Vx_pos ;
+  float *__restrict__ Vz    = w_cur + wav->Vz_pos ;
+  float *__restrict__ Txx   = w_cur + wav->Txx_pos;
+  float *__restrict__ Tzz   = w_cur + wav->Tzz_pos;
+  float *__restrict__ Txz   = w_cur + wav->Txz_pos;
+  float *__restrict__ hVx   = rhs   + wav->Vx_pos ; 
+  float *__restrict__ hVz   = rhs   + wav->Vz_pos ; 
+  float *__restrict__ hTxx  = rhs   + wav->Txx_pos; 
+  float *__restrict__ hTzz  = rhs   + wav->Tzz_pos; 
+  float *__restrict__ hTxz  = rhs   + wav->Txz_pos; 
 
-  float *restrict xi_x  = metric->xi_x;
-  float *restrict xi_z  = metric->xi_z;
-  float *restrict zt_x  = metric->zeta_x;
-  float *restrict zt_z  = metric->zeta_z;
-  float *restrict jac3d = metric->jac;
+  float *__restrict__ xi_x  = metric->xi_x;
+  float *__restrict__ xi_z  = metric->xi_z;
+  float *__restrict__ zt_x  = metric->zeta_x;
+  float *__restrict__ zt_z  = metric->zeta_z;
+  float *__restrict__ jac3d = metric->jac;
 
-  float *restrict c11   = md->c11;
-  float *restrict c13   = md->c13;
-  float *restrict c15   = md->c15;
-  float *restrict c33   = md->c33;
-  float *restrict c35   = md->c35;
-  float *restrict c55   = md->c55;
-  float *restrict slw3d = md->rho;
+  float *__restrict__ c11   = md->c11;
+  float *__restrict__ c13   = md->c13;
+  float *__restrict__ c33   = md->c33;
+  float *__restrict__ c55   = md->c55;
+  float *__restrict__ slw3d = md->rho;
 
   // grid size
   int ni1 = gd->ni1;
@@ -75,11 +73,11 @@ sv_curv_col_el_aniso_onestage(
 
   // local fd op
   int              fdx_inn_len;
-  int    *restrict fdx_inn_indx;
-  float  *restrict fdx_inn_coef;
+  int    *__restrict__ fdx_inn_indx;
+  float  *__restrict__ fdx_inn_coef;
   int              fdz_inn_len;
-  int    *restrict fdz_inn_indx;
-  float  *restrict fdz_inn_coef;
+  int    *__restrict__ fdz_inn_indx;
+  float  *__restrict__ fdz_inn_coef;
 
   // for get a op from 1d array, currently use num_of_fdz_op as index
   // length, index, coef of a op
@@ -92,17 +90,17 @@ sv_curv_col_el_aniso_onestage(
   fdz_inn_coef = fdz_op[num_of_fdz_op-1].coef;
 
   // inner points
-  sv_curv_col_el_aniso_rhs_inner(Vx,Vz,Txx,Tzz,Txz,
-                                 hVx,hVz,hTxx,hTzz,hTxz,
-                                 xi_x, xi_z, zt_x, zt_z,
-                                 c11,    c13,    c15,    
-                                         c33,    c35,    
-                                                 c55,    
-                                                          slw3d,
-                                 ni1,ni2,nk1,nk2,siz_line,
-                                 fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
-                                 fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
-                                 verbose);
+  sv_curv_col_el_vti_rhs_inner(Vx,Vz,Txx,Tzz,Txz,
+                               hVx,hVz,hTxx,hTzz,hTxz,
+                               xi_x, xi_z, zt_x, zt_z,
+                               c11,    c13,    
+                                       c33,    
+                                               c55,    
+                                                        slw3d,
+                               ni1,ni2,nk1,nk2,siz_line,
+                               fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
+                               fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
+                               verbose);
 
   // free, abs, source in turn
 
@@ -119,34 +117,34 @@ sv_curv_col_el_aniso_onestage(
                                verbose);
 
     // velocity: vlow
-    sv_curv_col_el_aniso_rhs_vlow_z2(Vx,Vz,hTxx,hTzz,hTxz,
-                                     xi_x, xi_z, zt_x, zt_z,
-                                     c11,    c13,    c15,    
-                                             c33,    c35,    
-                                                     c55,    
-                                                              slw3d,
-                                     vecVx2Vz,
-                                     ni1,ni2,nk1,nk2,siz_line,
-                                     fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
-                                     num_of_fdz_op,fdz_op,fdz_max_len,
-                                     verbose);
+    sv_curv_col_el_vti_rhs_vlow_z2(Vx,Vz,hTxx,hTzz,hTxz,
+                                   xi_x, xi_z, zt_x, zt_z,
+                                   c11,    c13,    
+                                           c33,    
+                                                   c55,    
+                                                            slw3d,
+                                   vecVx2Vz,
+                                   ni1,ni2,nk1,nk2,siz_line,
+                                   fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
+                                   num_of_fdz_op,fdz_op,fdz_max_len,
+                                   verbose);
   }
 
   // cfs-pml, loop face inside
   if (bdry->is_enable_pml == 1)
   {
-    sv_curv_col_el_aniso_rhs_cfspml(Vx,Vz,Txx,Tzz,Txz,
-                                    hVx,hVz,hTxx,hTzz,hTxz,
-                                    xi_x, xi_z, zt_x, zt_z,
-                                    c11,    c13,    c15,    
-                                            c33,    c35,    
-                                                    c55,    
-                                                             slw3d,
-                                    nk2, siz_line,
-                                    fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
-                                    fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
-                                    bdry,
-                                    verbose);
+    sv_curv_col_el_vti_rhs_cfspml(Vx,Vz,Txx,Tzz,Txz,
+                                  hVx,hVz,hTxx,hTzz,hTxz,
+                                  xi_x, xi_z, zt_x, zt_z,
+                                  c11,    c13,    
+                                          c33,    
+                                                  c55,    
+                                                           slw3d,
+                                  nk2, siz_line,
+                                  fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
+                                  fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
+                                  bdry,
+                                  verbose);
     
   }
 
@@ -167,23 +165,22 @@ sv_curv_col_el_aniso_onestage(
  ******************************************************************************/
 
 int
-sv_curv_col_el_aniso_rhs_inner(
-                float *restrict  Vx , float *restrict  Vz ,
-                float *restrict  Txx, float *restrict  Tzz,
-                float *restrict  Txz, 
-                float *restrict hVx , float *restrict hVz ,
-                float *restrict hTxx, float *restrict hTzz,
-                float *restrict hTxz, 
-                float *restrict xi_x, float *restrict xi_z,
-                float *restrict zt_x, float *restrict zt_z,
-                float *restrict c11d, float *restrict c13d,
-                float *restrict c15d, float *restrict c33d,
-                float *restrict c35d, float *restrict c55d,
-                float *restrict slw3d,
+sv_curv_col_el_vti_rhs_inner(
+                float *__restrict__  Vx , float *__restrict__  Vz ,
+                float *__restrict__  Txx, float *__restrict__  Tzz,
+                float *__restrict__  Txz, 
+                float *__restrict__ hVx , float *__restrict__ hVz ,
+                float *__restrict__ hTxx, float *__restrict__ hTzz,
+                float *__restrict__ hTxz, 
+                float *__restrict__ xi_x, float *__restrict__ xi_z,
+                float *__restrict__ zt_x, float *__restrict__ zt_z,
+                float *__restrict__ c11d, float *__restrict__ c13d,
+                float *__restrict__ c33d, float *__restrict__ c55d,
+                float *__restrict__ slw3d,
                 int ni1, int ni2, int nk1, int nk2,
                 size_t siz_line,
-                int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-                int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+                int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                 const int verbose)
 {
   // use local stack array for speedup
@@ -199,16 +196,16 @@ sv_curv_col_el_aniso_rhs_inner(
   float DxTxx,DxTzz,DxTxz,DxVx,DxVz;
   float DzTxx,DzTzz,DzTxz,DzVx,DzVz;
   float slw;
-  float c11,    c13,    c15    ;
-  float         c33,    c35    ;
-  float                 c55    ;
+  float c11,    c13        ;
+  float         c33        ;
+  float                 c55;
   float xix,xiz,ztx,ztz;
 
-  float *restrict Vx_ptr;
-  float *restrict Vz_ptr;
-  float *restrict Txx_ptr;
-  float *restrict Txz_ptr;
-  float *restrict Tzz_ptr;
+  float *__restrict__ Vx_ptr;
+  float *__restrict__ Vz_ptr;
+  float *__restrict__ Txx_ptr;
+  float *__restrict__ Txz_ptr;
+  float *__restrict__ Tzz_ptr;
 
   // put fd op into local array
   for (int i=0; i < fdx_len; i++) {
@@ -265,9 +262,7 @@ sv_curv_col_el_aniso_rhs_inner(
         slw = slw3d[iptr];
         c11 = c11d[iptr];
         c13 = c13d[iptr];
-        c15 = c15d[iptr];
         c33 = c33d[iptr];
-        c35 = c35d[iptr];
         c55 = c55d[iptr];
 
         // moment equation
@@ -278,14 +273,14 @@ sv_curv_col_el_aniso_rhs_inner(
 
         // Hooke's equatoin
 
-	      hTxx[iptr] = (c11*xix + c15*xiz) * DxVx + (c15*xix + c13*xiz) * DxVz
-                   + (c11*ztx + c15*ztz) * DzVx + (c15*ztx + c13*ztz) * DzVz;
+	      hTxx[iptr] = (c11*xix) * DxVx + (c13*xiz) * DxVz
+                   + (c11*ztx) * DzVx + (c13*ztz) * DzVz;
       
-        hTzz[iptr] = (c13*xix + c35*xiz) * DxVx + (c35*xix + c33*xiz) * DxVz
-                   + (c13*ztx + c35*ztz) * DzVx + (c35*ztx + c33*ztz) * DzVz;
+        hTzz[iptr] = (c13*xix) * DxVx + (c33*xiz) * DxVz
+                   + (c13*ztx) * DzVx + (c33*ztz) * DzVz;
   
-        hTxz[iptr] = (c15*xix + c55*xiz) * DxVx + (c55*xix + c35*xiz) * DxVz
-                   + (c15*ztx + c55*ztz) * DzVx + (c55*ztx + c35*ztz) * DzVz;
+        hTxz[iptr] = (c55*xiz) * DxVx + (c55*xix) * DxVz
+                   + (c55*ztz) * DzVx + (c55*ztx) * DzVz;
 
         iptr += 1;
       }
@@ -303,20 +298,19 @@ sv_curv_col_el_aniso_rhs_inner(
  */
 
 int
-sv_curv_col_el_aniso_rhs_vlow_z2(
-                float *restrict  Vx , float *restrict  Vz ,
-                float *restrict hTxx, float *restrict hTzz,
-                float *restrict hTxz, 
-                float *restrict xi_x, float *restrict xi_z,
-                float *restrict zt_x, float *restrict zt_z,
-                float *restrict c11d, float *restrict c13d,
-                float *restrict c15d, float *restrict c33d,
-                float *restrict c35d, float *restrict c55d,
-                float *restrict slw3d,
-                float *restrict vecVx2Vz,
+sv_curv_col_el_vti_rhs_vlow_z2(
+                float *__restrict__  Vx , float *__restrict__  Vz ,
+                float *__restrict__ hTxx, float *__restrict__ hTzz,
+                float *__restrict__ hTxz, 
+                float *__restrict__ xi_x, float *__restrict__ xi_z,
+                float *__restrict__ zt_x, float *__restrict__ zt_z,
+                float *__restrict__ c11d, float *__restrict__ c13d,
+                float *__restrict__ c33d, float *__restrict__ c55d,
+                float *__restrict__ slw3d,
+                float *__restrict__ vecVx2Vz,
                 int ni1, int ni2, int nk1, int nk2,
                 size_t siz_line,
-                int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
+                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                 int num_of_fdz_op, fd_op_t *fdz_op, int fdz_max_len,
                 const int verbose)
 {
@@ -337,9 +331,9 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
   float DxVx,DxVz;
   float DzVx,DzVz;
   float slw;
-  float c11,    c13,    c15    ;
-  float         c33,    c35    ;
-  float                 c55    ;
+  float c11,    c13        ;
+  float         c33        ;
+  float                 c55;
   float xix,xiz,ztx,ztz;
 
   // put fd op into local array
@@ -382,9 +376,7 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
         slw = slw3d[iptr];
         c11 = c11d[iptr];
         c13 = c13d[iptr];
-        c15 = c15d[iptr];
         c33 = c33d[iptr];
-        c35 = c35d[iptr];
         c55 = c55d[iptr];
 
         // Vx derivatives
@@ -410,14 +402,14 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
 
         // Hooke's equatoin
 
-	      hTxx[iptr] = (c11*xix + c15*xiz) * DxVx + (c15*xix + c13*xiz) * DxVz
-                   + (c11*ztx + c15*ztz) * DzVx + (c15*ztx + c13*ztz) * DzVz;
+	      hTxx[iptr] = (c11*xix) * DxVx + (c13*xiz) * DxVz
+                   + (c11*ztx) * DzVx + (c13*ztz) * DzVz;
       
-        hTzz[iptr] = (c13*xix + c35*xiz) * DxVx + (c35*xix + c33*xiz) * DxVz
-                   + (c13*ztx + c35*ztz) * DzVx + (c35*ztx + c33*ztz) * DzVz;
+        hTzz[iptr] = (c13*xix) * DxVx + (c33*xiz) * DxVz
+                   + (c13*ztx) * DzVx + (c33*ztz) * DzVz;
   
-        hTxz[iptr] = (c15*xix + c55*xiz) * DxVx + (c55*xix + c35*xiz) * DxVz
-                   + (c15*ztx + c55*ztz) * DzVx + (c55*ztx + c35*ztz) * DzVz;
+        hTxz[iptr] = (c55*xiz) * DxVx + (c55*xix) * DxVz
+                   + (c55*ztz) * DzVx + (c55*ztx) * DzVz;
 
         iptr += 1;
       }
@@ -435,22 +427,21 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
  */
 
 int
-sv_curv_col_el_aniso_rhs_cfspml(
-               float *restrict  Vx , float *restrict  Vz ,
-               float *restrict  Txx, float *restrict  Tzz,
-               float *restrict  Txz, 
-               float *restrict hVx , float *restrict hVz ,
-               float *restrict hTxx, float *restrict hTzz,
-               float *restrict hTxz, 
-               float *restrict xi_x, float *restrict xi_z,
-               float *restrict zt_x, float *restrict zt_z,
-               float *restrict c11d, float *restrict c13d,
-               float *restrict c15d, float *restrict c33d,
-               float *restrict c35d, float *restrict c55d,
-               float *restrict slw3d,
+sv_curv_col_el_vti_rhs_cfspml(
+               float *__restrict__  Vx , float *__restrict__  Vz ,
+               float *__restrict__  Txx, float *__restrict__  Tzz,
+               float *__restrict__  Txz, 
+               float *__restrict__ hVx , float *__restrict__ hVz ,
+               float *__restrict__ hTxx, float *__restrict__ hTzz,
+               float *__restrict__ hTxz, 
+               float *__restrict__ xi_x, float *__restrict__ xi_z,
+               float *__restrict__ zt_x, float *__restrict__ zt_z,
+               float *__restrict__ c11d, float *__restrict__ c13d,
+               float *__restrict__ c33d, float *__restrict__ c55d,
+               float *__restrict__ slw3d,
                int nk2, size_t siz_line,
-               int fdx_len, int *restrict fdx_indx, float *restrict fdx_coef,
-               int fdz_len, int *restrict fdz_indx, float *restrict fdz_coef,
+               int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
+               int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                bdry_t *bdry,
                const int verbose)
 {
@@ -469,9 +460,9 @@ sv_curv_col_el_aniso_rhs_cfspml(
   float DxTxx,DxTzz,DxTxz,DxVx,DxVz;
   float DzTxx,DzTzz,DzTxz,DzVx,DzVz;
   float slw;
-  float c11,    c13,    c15    ;
-  float         c33,    c35    ;
-  float                 c55    ;
+  float c11,    c13        ;
+  float         c33        ;
+  float                 c55;
   float xix,xiz,ztx,ztz;
   float hVx_rhs,hVz_rhs;
   float hTxx_rhs,hTzz_rhs,hTxz_rhs;
@@ -508,27 +499,27 @@ sv_curv_col_el_aniso_rhs_cfspml(
       int abs_nk2 = bdry->nk2[idim][iside];
 
       // get coef for this face
-      float *restrict ptr_coef_A = bdry->A[idim][iside];
-      float *restrict ptr_coef_B = bdry->B[idim][iside];
-      float *restrict ptr_coef_D = bdry->D[idim][iside];
+      float *__restrict__ ptr_coef_A = bdry->A[idim][iside];
+      float *__restrict__ ptr_coef_B = bdry->B[idim][iside];
+      float *__restrict__ ptr_coef_D = bdry->D[idim][iside];
 
       bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
 
       // get pml vars
-      float *restrict abs_vars_cur = auxvar->cur;
-      float *restrict abs_vars_rhs = auxvar->rhs;
+      float *__restrict__ abs_vars_cur = auxvar->cur;
+      float *__restrict__ abs_vars_rhs = auxvar->rhs;
 
-      float *restrict pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
-      float *restrict pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
-      float *restrict pml_Txx  = abs_vars_cur + auxvar->Txx_pos;
-      float *restrict pml_Tzz  = abs_vars_cur + auxvar->Tzz_pos;
-      float *restrict pml_Txz  = abs_vars_cur + auxvar->Txz_pos;
+      float *__restrict__ pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
+      float *__restrict__ pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
+      float *__restrict__ pml_Txx  = abs_vars_cur + auxvar->Txx_pos;
+      float *__restrict__ pml_Tzz  = abs_vars_cur + auxvar->Tzz_pos;
+      float *__restrict__ pml_Txz  = abs_vars_cur + auxvar->Txz_pos;
 
-      float *restrict pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
-      float *restrict pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
-      float *restrict pml_hTxx = abs_vars_rhs + auxvar->Txx_pos;
-      float *restrict pml_hTzz = abs_vars_rhs + auxvar->Tzz_pos;
-      float *restrict pml_hTxz = abs_vars_rhs + auxvar->Txz_pos;
+      float *__restrict__ pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
+      float *__restrict__ pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
+      float *__restrict__ pml_hTxx = abs_vars_rhs + auxvar->Txx_pos;
+      float *__restrict__ pml_hTzz = abs_vars_rhs + auxvar->Tzz_pos;
+      float *__restrict__ pml_hTxz = abs_vars_rhs + auxvar->Txz_pos;
 
       // for each dim
       if (idim == 0 ) // x direction
@@ -555,9 +546,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
               slw = slw3d[iptr];
               c11 = c11d[iptr];
               c13 = c13d[iptr];
-              c15 = c15d[iptr];
               c33 = c33d[iptr];
-              c35 = c35d[iptr];
               c55 = c55d[iptr];
 
               // xi derivatives
@@ -570,9 +559,9 @@ sv_curv_col_el_aniso_rhs_cfspml(
               // combine for corr and aux vars
                hVx_rhs = slw * ( xix*DxTxx + xiz*DxTxz );
                hVz_rhs = slw * ( xix*DxTxz + xiz*DxTzz );
-              hTxx_rhs = (c11*xix+c15*xiz)*DxVx + (c15*xix+c13*xiz)*DxVz; 
-              hTzz_rhs = (c13*xix+c35*xiz)*DxVx + (c35*xix+c33*xiz)*DxVz;
-              hTxz_rhs = (c15*xix+c55*xiz)*DxVx + (c55*xix+c35*xiz)*DxVz;
+              hTxx_rhs = (c11*xix)*DxVx + (c13*xiz)*DxVz; 
+              hTzz_rhs = (c13*xix)*DxVx + (c33*xiz)*DxVz;
+              hTxz_rhs = (c55*xiz)*DxVx + (c55*xix)*DxVz;
 
               // 1: make corr to moment equation
               hVx[iptr] += coef_B_minus_1 * hVx_rhs - coef_B * pml_Vx[iptr_a];
@@ -609,9 +598,9 @@ sv_curv_col_el_aniso_rhs_cfspml(
                 ztz = zt_z[iptr];
 
                 // keep xi derivative terms, including free surface convered
-                hTxx_rhs = (c11*ztx+c15*ztz)*Dx_DzVx + (c15*ztx+c13*ztz)*Dx_DzVz; 
-                hTzz_rhs = (c13*ztx+c35*ztz)*Dx_DzVx + (c35*ztx+c33*ztz)*Dx_DzVz;
-                hTxz_rhs = (c15*ztx+c55*ztz)*Dx_DzVx + (c55*ztx+c35*ztz)*Dx_DzVz;
+                hTxx_rhs = (c11*ztx)*Dx_DzVx + (c13*ztz)*Dx_DzVz; 
+                hTzz_rhs = (c13*ztx)*Dx_DzVx + (c33*ztz)*Dx_DzVz;
+                hTxz_rhs = (c55*ztz)*Dx_DzVx + (c55*ztx)*Dx_DzVz;
 
                 // make corr to Hooke's equatoin
                 hTxx[iptr] += (coef_B - 1.0) * hTxx_rhs;
@@ -656,9 +645,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
               slw = slw3d[iptr];
               c11 = c11d[iptr];
               c13 = c13d[iptr];
-              c15 = c15d[iptr];
               c33 = c33d[iptr];
-              c35 = c35d[iptr];
               c55 = c55d[iptr];
 
               // zt derivatives
@@ -671,9 +658,9 @@ sv_curv_col_el_aniso_rhs_cfspml(
               // combine for corr and aux vars
                hVx_rhs = slw * ( ztx*DzTxx + ztz*DzTxz );
                hVz_rhs = slw * ( ztx*DzTxz + ztz*DzTzz );
-              hTxx_rhs = (c11*ztx+c15*ztz)*DzVx + (c15*ztx+c13*ztz)*DzVz; 
-              hTzz_rhs = (c13*ztx+c35*ztz)*DzVx + (c35*ztx+c33*ztz)*DzVz;
-              hTxz_rhs = (c15*ztx+c55*ztz)*DzVx + (c55*ztx+c35*ztz)*DzVz;
+              hTxx_rhs = (c11*ztx)*DzVx + (c13*ztz)*DzVz; 
+              hTzz_rhs = (c13*ztx)*DzVx + (c33*ztz)*DzVz;
+              hTxz_rhs = (c55*ztz)*DzVx + (c55*ztx)*DzVz;
 
               // 1: make corr to moment equation
               hVx[iptr] += coef_B_minus_1 * hVx_rhs - coef_B * pml_Vx[iptr_a];
@@ -711,11 +698,11 @@ sv_curv_col_el_aniso_rhs_cfspml(
  ******************************************************************************/
 
 int
-sv_curv_col_el_aniso_dvh2dvz(gd_t        *gd,
-                             gdcurv_metric_t *metric,
-                             md_t       *md,
-                             bdry_t      *bdry,
-                             const int verbose)
+sv_curv_col_el_vti_dvh2dvz(gd_t        *gd,
+                           gdcurv_metric_t *metric,
+                           md_t       *md,
+                           bdry_t      *bdry,
+                           const int verbose)
 {
   int ierr = 0;
 
@@ -728,26 +715,24 @@ sv_curv_col_el_aniso_dvh2dvz(gd_t        *gd,
   size_t siz_line   = gd->siz_line;
 
   // point to each var
-  float *restrict xi_x = metric->xi_x;
-  float *restrict xi_z = metric->xi_z;
-  float *restrict zt_x = metric->zeta_x;
-  float *restrict zt_z = metric->zeta_z;
+  float *__restrict__ xi_x = metric->xi_x;
+  float *__restrict__ xi_z = metric->xi_z;
+  float *__restrict__ zt_x = metric->zeta_x;
+  float *__restrict__ zt_z = metric->zeta_z;
 
-  float *restrict c11d = md->c11;
-  float *restrict c13d = md->c13;
-  float *restrict c15d = md->c15;
-  float *restrict c33d = md->c33;
-  float *restrict c35d = md->c35;
-  float *restrict c55d = md->c55;
+  float *__restrict__ c11d = md->c11;
+  float *__restrict__ c13d = md->c13;
+  float *__restrict__ c33d = md->c33;
+  float *__restrict__ c55d = md->c55;
 
   float *vecVx2Vz = bdry->vecVx2Vz2;
 
   float A[2][2], B[2][2], C[2][2];
   float AB[2][2], AC[2][2];
 
-  float c11,    c13,    c15    ;
-  float         c33,    c35    ;
-  float                 c55    ;
+  float c11,    c13        ;
+  float         c33        ;
+  float                 c55;
   float xix,xiz,ztx,ztz;
  
   int k = nk2;
@@ -763,25 +748,23 @@ sv_curv_col_el_aniso_dvh2dvz(gd_t        *gd,
       
       c11 = c11d[iptr];
       c13 = c13d[iptr];
-      c15 = c15d[iptr];
       c33 = c33d[iptr];
-      c35 = c35d[iptr];
       c55 = c55d[iptr];
 
       // first dim: irow; sec dim: jcol, as Fortran code
-      A[0][0] = (c11*ztx+c15*ztz)*ztx + (c15*ztx+c55*ztz)*ztz;
-      A[1][0] = (c15*ztx+c55*ztz)*ztx + (c13*ztx+c35*ztz)*ztz;
+      A[0][0] = (c11*ztx)*ztx + (c55*ztz)*ztz;
+      A[1][0] = (c55*ztz)*ztx + (c13*ztx)*ztz;
 
-      A[0][1] = (c15*ztx+c13*ztz)*ztx + (c55*ztx+c35*ztz)*ztz; 
-      A[1][1] = (c55*ztx+c35*ztz)*ztx + (c35*ztx+c33*ztz)*ztz; 
+      A[0][1] = (c13*ztz)*ztx + (c55*ztx)*ztz; 
+      A[1][1] = (c55*ztx)*ztx + (c33*ztz)*ztz; 
 
       fdlib_math_invert2x2(A);
                                                        
-      B[0][0] = (c11*xix+c15*xiz)*ztx + (c15*xix+c55*xiz)*ztz;
-      B[1][0] = (c15*xix+c55*xiz)*ztx + (c13*xix+c35*xiz)*ztz;
+      B[0][0] = (c11*xix)*ztx + (c55*xiz)*ztz;
+      B[1][0] = (c55*xiz)*ztx + (c13*xix)*ztz;
 
-      B[0][1] = (c15*xix+c13*xiz)*ztx + (c55*xix+c35*xiz)*ztz; 
-      B[1][1] = (c55*xix+c35*xiz)*ztx + (c35*xix+c33*xiz)*ztz; 
+      B[0][1] = (c13*xiz)*ztx + (c55*xix)*ztz; 
+      B[1][1] = (c55*xix)*ztx + (c33*xiz)*ztz; 
        
       fdlib_math_matmul2x2(A, B, AB);
 

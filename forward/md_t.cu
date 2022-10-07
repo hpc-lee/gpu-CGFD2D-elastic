@@ -224,8 +224,8 @@ md_export(gd_t  *gd,
 {
   int ierr = 0;
 
-  size_t *restrict m3d_pos   = md->cmp_pos;
-  char  **restrict m3d_name  = md->cmp_name;
+  size_t *__restrict__ m3d_pos   = md->cmp_pos;
+  char  **__restrict__ m3d_name  = md->cmp_name;
   int  number_of_vars = md->ncmp;
   int  nx = md->nx;
   int  nz = md->nz;
@@ -444,7 +444,7 @@ md_gen_test_Qs(md_t *md, float Qs_freq)
  */
 
 int
-md_rho_to_slow(float *restrict rho, size_t siz_volume)
+md_rho_to_slow(float *__restrict__ rho, size_t siz_volume)
 {
   int ierr = 0;
 
