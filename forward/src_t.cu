@@ -104,7 +104,7 @@ src_read_locate_file(gd_t     *gd,
   int   nx  = gd->nx ;
   int   nz  = gd->nz ;
   int   npoint_ghosts = gd->npoint_ghosts;
-  size_t siz_line= gd->siz_line;
+  size_t siz_iz= gd->siz_iz;
 
   // get total elem of exted src region for a single point
   int len_ext = 2*npoint_half_ext+1;
@@ -424,7 +424,7 @@ src_read_locate_file(gd_t     *gd,
           if (gd_lindx_is_inner(i,k,gd)==1)
           {
             // Note index need match coef
-            int iptr_grid = i + k * siz_line;
+            int iptr_grid = i + k * siz_iz;
             int iptr_coef = (i-(si-npoint_half_ext))
                             + len_ext * (k-(sk-npoint_half_ext)); 
             src->ext_indx[iptr_ext + is_local * max_ext] = iptr_grid;

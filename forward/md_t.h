@@ -12,8 +12,8 @@ typedef struct {
   int nx, nz, ncmp;
   float *v3d; // allocated var
 
-  size_t siz_line;
-  size_t siz_slice;
+  size_t siz_iz;
+  size_t siz_icmp;
 
   size_t *cmp_pos;
   char  **cmp_name;

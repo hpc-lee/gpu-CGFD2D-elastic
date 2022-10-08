@@ -18,7 +18,7 @@ sv_curv_col_el_rhs_timg_z2(
              float *__restrict__ zt_x, float *__restrict__ zt_z,
              float *__restrict__ jac3d, float *__restrict__ slw3d,
              int ni1, int ni2, int nk1, int nk2,
-             size_t siz_line,
+             size_t siz_iz,
              int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
              int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
              const int verbose);

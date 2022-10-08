@@ -13,8 +13,8 @@ typedef struct {
   float *var;
   int nx, nz, ncmp, nlevel;
 
-  size_t siz_line;
-  size_t siz_slice;
+  size_t siz_iz;
+  size_t siz_icmp;
   size_t siz_ilevel;
 
   size_t *cmp_pos;
@@ -181,6 +181,6 @@ float
 bdry_ablexp_cal_mask(int i, float vel, float dt, int num_lay, float dh);
 
 int
-bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_slice);
+bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_icmp);
 
 #endif

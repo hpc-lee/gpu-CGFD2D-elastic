@@ -21,8 +21,8 @@ md_init(gd_t *gd, md_t *md, int media_type, int visco_type)
   md->nx   = gd->nx;
   md->nz   = gd->nz;
 
-  md->siz_line   = md->nx;
-  md->siz_slice  = md->nx * md->nz;
+  md->siz_iz   = md->nx;
+  md->siz_icmp  = md->nx * md->nz;
 
   // media type
   md->medium_type = media_type;
@@ -61,7 +61,7 @@ md_init(gd_t *gd, md_t *md, int media_type, int visco_type)
   
   // vars
   md->v3d = (float *) fdlib_mem_calloc_1d_float(
-                          md->siz_slice * md->ncmp,
+                          md->siz_icmp * md->ncmp,
                           0.0, "md_init");
   if (md->v3d == NULL) {
       fprintf(stderr,"Error: failed to alloc medium_el_iso\n");
@@ -81,7 +81,7 @@ md_init(gd_t *gd, md_t *md, int media_type, int visco_type)
   // set pos
   for (int icmp=0; icmp < md->ncmp; icmp++)
   {
-    cmp_pos[icmp] = icmp * md->siz_slice;
+    cmp_pos[icmp] = icmp * md->siz_icmp;
   }
 
   // init
@@ -297,7 +297,7 @@ md_gen_test_ac_iso(md_t *md)
 
   int nx = md->nx;
   int nz = md->nz;
-  int siz_line = md->siz_line;
+  int siz_iz = md->siz_iz;
 
   float *kappa3d = md->kappa;
   float *rho3d = md->rho;
@@ -306,7 +306,7 @@ md_gen_test_ac_iso(md_t *md)
   {
       for (size_t i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
         float Vp=3000.0;
         float rho=1500.0;
         float kappa = Vp*Vp*rho;
@@ -325,7 +325,7 @@ md_gen_test_el_iso(md_t *md)
 
   int nx = md->nx;
   int nz = md->nz;
-  int siz_line = md->siz_line;
+  int siz_iz = md->siz_iz;
 
   float *lam3d = md->lambda;
   float  *mu3d = md->mu;
@@ -335,7 +335,7 @@ md_gen_test_el_iso(md_t *md)
   {
       for (size_t i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
         float Vp=3000.0;
         float Vs=2000.0;
         float rho=1500.0;
@@ -357,13 +357,13 @@ md_gen_test_el_vti(md_t *md)
 
   int nx = md->nx;
   int nz = md->nz;
-  int siz_line = md->siz_line;
+  int siz_iz = md->siz_iz;
 
   for (size_t k=0; k<nz; k++)
   {
       for (size_t i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
 
         float rho=1500.0;
 
@@ -387,13 +387,13 @@ md_gen_test_el_aniso(md_t *md)
 
   int nx = md->nx;
   int nz = md->nz;
-  int siz_line = md->siz_line;
+  int siz_iz = md->siz_iz;
 
   for (size_t k=0; k<nz; k++)
   {
       for (size_t i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
 
         float rho=1500.0;
 
@@ -421,7 +421,7 @@ md_gen_test_Qs(md_t *md, float Qs_freq)
 
   int nx = md->nx;
   int nz = md->nz;
-  int siz_line = md->siz_line;
+  int siz_iz = md->siz_iz;
 
   md->visco_Qs_freq = Qs_freq;
 
@@ -431,7 +431,7 @@ md_gen_test_Qs(md_t *md, float Qs_freq)
   {
       for (size_t i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
         Qs[iptr] = 20;
       }
   }

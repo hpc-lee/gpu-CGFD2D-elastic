@@ -46,7 +46,7 @@ bdry_free_set(gd_t    *gd,
 {
   int ierr = 0;
 
-  size_t siz_line  = gd->siz_line;
+  size_t siz_iz  = gd->siz_iz;
 
   // default disable
   bdryfree->is_enable_free = 0;
@@ -69,7 +69,7 @@ bdry_free_set(gd_t    *gd,
 
   // following only implement z2 (top) right now
   float *vecVx2Vz = (float *)fdlib_mem_calloc_1d_float(
-                                      siz_line * CONST_NDIM * CONST_NDIM,
+                                      siz_iz * CONST_NDIM * CONST_NDIM,
                                       0.0,
                                       "bdry_free_set");
 
@@ -96,7 +96,7 @@ bdry_pml_set(gd_t     *gd,
   int    nk2 = gd->nk2;
   int    nx  = gd->nx ;
   int    nz  = gd->nz ;
-  int    siz_line = gd->siz_line;
+  int    siz_iz = gd->siz_iz;
 
   // default disable
   bdrypml->is_enable_pml = 0;
@@ -283,19 +283,19 @@ bdry_pml_auxvar_init(int nx, int nz,
   auxvar->ncmp = wav->ncmp;
   auxvar->nlevel = wav->nlevel;
 
-  auxvar->siz_line   = auxvar->nx;
-  auxvar->siz_slice = auxvar->nx * auxvar->nz;
-  auxvar->siz_ilevel = auxvar->siz_slice * auxvar->ncmp;
+  auxvar->siz_iz   = auxvar->nx;
+  auxvar->siz_icmp = auxvar->nx * auxvar->nz;
+  auxvar->siz_ilevel = auxvar->siz_icmp * auxvar->ncmp;
 
-  auxvar->Vx_pos  = wav->Vx_seq  * auxvar->siz_slice;
-  auxvar->Vz_pos  = wav->Vz_seq  * auxvar->siz_slice;
-  auxvar->Txx_pos = wav->Txx_seq * auxvar->siz_slice;
-  auxvar->Tzz_pos = wav->Tzz_seq * auxvar->siz_slice;
-  auxvar->Txz_pos = wav->Txz_seq * auxvar->siz_slice;
+  auxvar->Vx_pos  = wav->Vx_seq  * auxvar->siz_icmp;
+  auxvar->Vz_pos  = wav->Vz_seq  * auxvar->siz_icmp;
+  auxvar->Txx_pos = wav->Txx_seq * auxvar->siz_icmp;
+  auxvar->Tzz_pos = wav->Tzz_seq * auxvar->siz_icmp;
+  auxvar->Txz_pos = wav->Txz_seq * auxvar->siz_icmp;
 
   // vars
   // contain all vars at each side, include rk scheme 4 levels vars
-  if (auxvar->siz_slice> 0 ) { // valid pml layer
+  if (auxvar->siz_icmp> 0 ) { // valid pml layer
     auxvar->var = (float *) fdlib_mem_calloc_1d_float( 
                  auxvar->siz_ilevel * auxvar->nlevel,
                  0.0, "bdry_pml_auxvar_init");
@@ -319,7 +319,7 @@ bdry_cal_abl_len_dh(gd_t *gd,
 {
   int ierr = 0;
 
-  int siz_line = gd->siz_line;
+  int siz_iz = gd->siz_iz;
 
   // cartesian grid is simple
   if (gd->type == GD_TYPE_CART)
@@ -346,12 +346,12 @@ bdry_cal_abl_len_dh(gd_t *gd,
     {
       for (int k=abs_nk1; k<=abs_nk2; k++)
       {
-        int iptr = abs_ni1 + k * siz_line;
+        int iptr = abs_ni1 + k * siz_iz;
         double x0 = x3d[iptr];
         double z0 = z3d[iptr];
         for (int i=abs_ni1+1; i<=abs_ni2; i++)
         {
-          int iptr = i + k * siz_line;
+          int iptr = i + k * siz_iz;
 
           double x1 = x3d[iptr];
           double z1 = z3d[iptr];
@@ -371,12 +371,12 @@ bdry_cal_abl_len_dh(gd_t *gd,
     { 
       for (int i=abs_ni1; i<=abs_ni2; i++)
       {
-        int iptr = i + abs_nk1 * siz_line;
+        int iptr = i + abs_nk1 * siz_iz;
         double x0 = x3d[iptr];
         double z0 = z3d[iptr];
         for (int k=abs_nk1+1; k<=abs_nk2; k++)
         {
-          int iptr = i + k * siz_line;
+          int iptr = i + k * siz_iz;
 
           double x1 = x3d[iptr];
           double z1 = z3d[iptr];
@@ -422,7 +422,7 @@ bdry_ablexp_set(gd_t *gd,
   int    nk  = gd->nk ;
   int    nx  = gd->nx ;
   int    nz  = gd->nz ;
-  int    siz_line = gd->siz_line;
+  int    siz_iz = gd->siz_iz;
   int    abs_number[CONST_NDIM][2];
 
   int n;
@@ -600,7 +600,7 @@ bdry_ablexp_cal_mask(int i, float vel, float dt, int num_lay, float dh)
 }
 
 int
-bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_slice)
+bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_icmp)
 {
   float *Ex = bdry->ablexp_Ex;
   float *Ez = bdry->ablexp_Ez;
@@ -608,7 +608,7 @@ bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_slice)
   int nx = bdry->nx;
   int nz = bdry->nz;
 
-  size_t siz_line = nx;
+  size_t siz_iz = nx;
   size_t iptr;
   float mask;
 
@@ -616,7 +616,7 @@ bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_slice)
   
   for (int ivar=0; ivar<ncmp; ivar++)
   {
-    float *W = w_end + ivar * siz_slice;
+    float *W = w_end + ivar * siz_icmp;
 
     for (int n=0; n < CONST_NDIM_2; n++)
     {
@@ -626,7 +626,7 @@ bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_slice)
         {
             for (int i = D[n].ni1; i <= D[n].ni2; i++)
             {
-              iptr = k * siz_line + i;
+              iptr = k * siz_iz + i;
               mask = (Ex[i]<Ez[k]) ? Ex[i] : Ez[k];
 
               W[iptr] *= mask;

@@ -69,7 +69,7 @@ sv_curv_col_el_aniso_onestage(
   int nk  = gd->nk;
   int nx  = gd->nx;
   int nz  = gd->nz;
-  size_t siz_line   = gd->siz_line;
+  size_t siz_iz   = gd->siz_iz;
 
   float *vecVx2Vz = bdry->vecVx2Vz2;
 
@@ -99,7 +99,7 @@ sv_curv_col_el_aniso_onestage(
                                          c33,    c35,    
                                                  c55,    
                                                           slw3d,
-                                 ni1,ni2,nk1,nk2,siz_line,
+                                 ni1,ni2,nk1,nk2,siz_iz,
                                  fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
                                  fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
                                  verbose);
@@ -113,7 +113,7 @@ sv_curv_col_el_aniso_onestage(
     sv_curv_col_el_rhs_timg_z2(Txx,Tzz,Txz,hVx,hVz,
                                xi_x, xi_z, zt_x, zt_z,
                                jac3d, slw3d,
-                               ni1,ni2,nk1,nk2,siz_line,
+                               ni1,ni2,nk1,nk2,siz_iz,
                                fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
                                fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
                                verbose);
@@ -126,7 +126,7 @@ sv_curv_col_el_aniso_onestage(
                                                      c55,    
                                                               slw3d,
                                      vecVx2Vz,
-                                     ni1,ni2,nk1,nk2,siz_line,
+                                     ni1,ni2,nk1,nk2,siz_iz,
                                      fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
                                      num_of_fdz_op,fdz_op,fdz_max_len,
                                      verbose);
@@ -142,7 +142,7 @@ sv_curv_col_el_aniso_onestage(
                                             c33,    c35,    
                                                     c55,    
                                                              slw3d,
-                                    nk2, siz_line,
+                                    nk2, siz_iz,
                                     fdx_inn_len, fdx_inn_indx, fdx_inn_coef,
                                     fdz_inn_len, fdz_inn_indx, fdz_inn_coef,
                                     bdry,
@@ -181,7 +181,7 @@ sv_curv_col_el_aniso_rhs_inner(
                 float *__restrict__ c35d, float *__restrict__ c55d,
                 float *__restrict__ slw3d,
                 int ni1, int ni2, int nk1, int nk2,
-                size_t siz_line,
+                size_t siz_iz,
                 int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                 int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                 const int verbose)
@@ -217,13 +217,13 @@ sv_curv_col_el_aniso_rhs_inner(
   }
   for (int k=0; k < fdz_len; k++) {
     lfdz_coef [k] = fdz_coef[k];
-    lfdz_shift[k] = fdz_indx[k] * siz_line;
+    lfdz_shift[k] = fdz_indx[k] * siz_iz;
   }
 
   // loop all points
   for (size_t k=nk1; k<=nk2; k++)
   {
-    size_t iptr_k = k * siz_line;
+    size_t iptr_k = k * siz_iz;
 
       size_t iptr = iptr_k + ni1;
 
@@ -315,7 +315,7 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
                 float *__restrict__ slw3d,
                 float *__restrict__ vecVx2Vz,
                 int ni1, int ni2, int nk1, int nk2,
-                size_t siz_line,
+                size_t siz_iz,
                 int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                 int num_of_fdz_op, fd_op_t *fdz_op, int fdz_max_len,
                 const int verbose)
@@ -361,12 +361,12 @@ sv_curv_col_el_aniso_rhs_vlow_z2(
     int   *p_fdz_indx  = fdz_op[n].indx;
     float *p_fdz_coef  = fdz_op[n].coef;
     for (n_fd = 0; n_fd < lfdz_len ; n_fd++) {
-      lfdz_shift[n_fd] = p_fdz_indx[n_fd] * siz_line;
+      lfdz_shift[n_fd] = p_fdz_indx[n_fd] * siz_iz;
       lfdz_coef[n_fd]  = p_fdz_coef[n_fd];
     }
 
     // for index
-    size_t iptr_k = k * siz_line;
+    size_t iptr_k = k * siz_iz;
 
       size_t iptr = iptr_k + ni1;
 
@@ -448,7 +448,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
                float *__restrict__ c15d, float *__restrict__ c33d,
                float *__restrict__ c35d, float *__restrict__ c55d,
                float *__restrict__ slw3d,
-               int nk2, size_t siz_line,
+               int nk2, size_t siz_iz,
                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                bdry_t *bdry,
@@ -490,7 +490,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
   }
   for (k=0; k < fdz_len; k++) {
     lfdz_coef [k] = fdz_coef[k];
-    lfdz_shift[k] = fdz_indx[k] * siz_line;
+    lfdz_shift[k] = fdz_indx[k] * siz_iz;
   }
 
   // check each side
@@ -536,7 +536,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
         iptr_a = 0;
         for (k=abs_nk1; k<=abs_nk2; k++)
         {
-          iptr_k = k * siz_line;
+          iptr_k = k * siz_iz;
             iptr = iptr_k + abs_ni1;
             for (i=abs_ni1; i<=abs_ni2; i++)
             {
@@ -636,7 +636,7 @@ sv_curv_col_el_aniso_rhs_cfspml(
         iptr_a = 0;
         for (k=abs_nk1; k<=abs_nk2; k++)
         {
-          iptr_k = k * siz_line;
+          iptr_k = k * siz_iz;
 
           // pml coefs
           int abs_k = k - abs_nk1;
@@ -725,7 +725,7 @@ sv_curv_col_el_aniso_dvh2dvz(gd_t        *gd,
   int nk2 = gd->nk2;
   int nx  = gd->nx;
   int nz  = gd->nz;
-  size_t siz_line   = gd->siz_line;
+  size_t siz_iz   = gd->siz_iz;
 
   // point to each var
   float *__restrict__ xi_x = metric->xi_x;
@@ -754,7 +754,7 @@ sv_curv_col_el_aniso_dvh2dvz(gd_t        *gd,
 
     for (size_t i = ni1; i <= ni2; i++)
     {
-      size_t iptr = i + k * siz_line;
+      size_t iptr = i + k * siz_iz;
 
       xix = xi_x[iptr];
       xiz = xi_z[iptr];

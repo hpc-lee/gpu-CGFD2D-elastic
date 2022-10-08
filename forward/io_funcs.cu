@@ -138,10 +138,10 @@ io_recv_read_locate(gd_t *gd,
       this_recv->di = rx_inc;
       this_recv->dk = rz_inc;
 
-      this_recv->indx1d[0] = ix   + iz     * gd->siz_line;
-      this_recv->indx1d[1] = ix+1 + iz     * gd->siz_line;
-      this_recv->indx1d[2] = ix   + (iz+1) * gd->siz_line;
-      this_recv->indx1d[3] = ix+1 + (iz+1) * gd->siz_line;
+      this_recv->indx1d[0] = ix   + iz     * gd->siz_iz;
+      this_recv->indx1d[1] = ix+1 + iz     * gd->siz_iz;
+      this_recv->indx1d[2] = ix   + (iz+1) * gd->siz_iz;
+      this_recv->indx1d[3] = ix+1 + (iz+1) * gd->siz_iz;
 
       nr_this += 1;
     }
@@ -257,7 +257,7 @@ int io_line_locate(gd_t *gd,
         int i = gi + gd->fdx_nghosts;
         int k = gk + gd->fdz_nghosts;
 
-        int iptr = i + k * gd->siz_line;
+        int iptr = i + k * gd->siz_iz;
 
         ioline->recv_seq [m][ir] = ipt;
         ioline->recv_iptr[m][ir] = iptr;
@@ -493,7 +493,7 @@ io_snap_nc_put(iosnap_t *iosnap,
   int ierr = 0;
 
   int num_of_snap = iosnap->num_of_snap;
-  size_t siz_line = gd->siz_line;
+  size_t siz_iz = gd->siz_iz;
 
   for (int n=0; n<num_of_snap; n++)
   {
@@ -529,13 +529,13 @@ io_snap_nc_put(iosnap_t *iosnap,
       // vel
       if (is_run_out_vel == 1 && snap_out_V==1)
       {
-        io_snap_pack_buff(w4d + wav->Vx_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Vx_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_V[n*CONST_NDIM+0],
               startp,countp,buff);
 
-        io_snap_pack_buff(w4d + wav->Vz_pos, siz_line,
+        io_snap_pack_buff(w4d + wav->Vz_pos, siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_V[n*CONST_NDIM+1],
@@ -543,19 +543,19 @@ io_snap_nc_put(iosnap_t *iosnap,
       }
       if (is_run_out_stress==1 && snap_out_T==1)
       {
-        io_snap_pack_buff(w4d + wav->Txx_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Txx_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_T[n*3+0],
               startp,countp,buff);
 
-        io_snap_pack_buff(w4d + wav->Tzz_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Tzz_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_T[n*3+1],
               startp,countp,buff);
         
-        io_snap_pack_buff(w4d + wav->Txz_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Txz_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_T[n*3+2],
@@ -672,7 +672,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
   int ierr = 0;
 
   int num_of_snap = iosnap->num_of_snap;
-  size_t siz_line = gd->siz_line;
+  size_t siz_iz = gd->siz_iz;
 
   for (int n=0; n<num_of_snap; n++)
   {
@@ -708,13 +708,13 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
       // vel
       if (is_run_out_vel == 1 && snap_out_V==1)
       {
-        io_snap_pack_buff(w4d + wav->Vx_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Vx_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_V[n*CONST_NDIM+0],
               startp,countp,buff);
 
-        io_snap_pack_buff(w4d + wav->Vz_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Vz_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_V[n*CONST_NDIM+1],
@@ -722,7 +722,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
       }
       if (is_run_out_stress==1 && snap_out_T==1)
       {
-        io_snap_pack_buff(w4d + wav->Txx_pos,siz_line,
+        io_snap_pack_buff(w4d + wav->Txx_pos,siz_iz,
               snap_i1,snap_ni,snap_di,
               snap_k1,snap_nk,snap_dk,buff);
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_T[n],
@@ -745,7 +745,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
 
 int
 io_snap_pack_buff(float *__restrict__ var,
-                  size_t siz_line,
+                  size_t siz_iz,
                   int starti,
                   int counti,
                   int increi,
@@ -761,7 +761,7 @@ io_snap_pack_buff(float *__restrict__ var,
       for (int n1=0; n1<counti; n1++)
       {
         int i = starti + n1 * increi;
-        int iptr = i + k * siz_line;
+        int iptr = i + k * siz_iz;
         buff[iptr_snap] = var[iptr];
         iptr_snap++;
       }
@@ -782,7 +782,7 @@ io_snap_nc_close(iosnap_nc_t *iosnap_nc)
 
 int
 io_recv_keep(iorecv_t *iorecv, float *__restrict__ w4d,
-             int it, int ncmp, int siz_slice)
+             int it, int ncmp, int siz_icmp)
 {
   float Lx1, Lx2, Ly1, Ly2, Lz1, Lz2;
 
@@ -797,7 +797,7 @@ io_recv_keep(iorecv_t *iorecv, float *__restrict__ w4d,
     for (int icmp=0; icmp < ncmp; icmp++)
     {
       int iptr_sta = icmp * iorecv->max_nt + it;
-      size_t iptr_cmp = icmp * siz_slice;
+      size_t iptr_cmp = icmp * siz_icmp;
       this_recv->seismo[iptr_sta] = 
           w4d[iptr_cmp + indx1d[0]] * Lx1 * Lz1
         + w4d[iptr_cmp + indx1d[1]] * Lx2 * Lz1
@@ -811,7 +811,7 @@ io_recv_keep(iorecv_t *iorecv, float *__restrict__ w4d,
 
 int
 io_line_keep(ioline_t *ioline, float *__restrict__ w4d,
-             int it, int ncmp, int siz_slice)
+             int it, int ncmp, int siz_icmp)
 {
   for (int n=0; n < ioline->num_of_lines; n++)
   {
@@ -825,7 +825,7 @@ io_line_keep(ioline_t *ioline, float *__restrict__ w4d,
       for (int icmp=0; icmp < ncmp; icmp++)
       {
         int iptr_seismo = icmp * ioline->max_nt + it;
-        this_seismo[iptr_seismo] = w4d[icmp*siz_slice + iptr];
+        this_seismo[iptr_seismo] = w4d[icmp*siz_icmp + iptr];
       }
     }
   }

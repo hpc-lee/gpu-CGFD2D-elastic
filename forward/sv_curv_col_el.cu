@@ -25,7 +25,7 @@ sv_curv_col_el_rhs_timg_z2(
                     float *__restrict__ zt_x, float *__restrict__ zt_z,
                     float *__restrict__ jac3d, float *__restrict__ slw3d,
                     int ni1, int ni2, int nk1, int nk2,
-                    size_t siz_line, 
+                    size_t siz_iz, 
                     int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                     int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                     const int verbose)
@@ -56,7 +56,7 @@ sv_curv_col_el_rhs_timg_z2(
   }
   for (int k=0; k < fdz_len; k++) {
     lfdz_coef [k] = fdz_coef[k];
-    lfdz_shift[k] = fdz_indx[k] * siz_line;
+    lfdz_shift[k] = fdz_indx[k] * siz_iz;
   }
 
   // last indx, free surface force Tx/Ty/Tz to 0 in cal
@@ -71,7 +71,7 @@ sv_curv_col_el_rhs_timg_z2(
     int n_free = nk2 - k - fdz_indx[0]; // first indx is negative
 
     // for 1d index
-    size_t iptr_k = k * siz_line;
+    size_t iptr_k = k * siz_iz;
 
       size_t iptr = iptr_k + ni1;
 
@@ -99,7 +99,7 @@ sv_curv_col_el_rhs_timg_z2(
 
           // blow surface -> cal
           for (n=0; n<n_free; n++) {
-            iptr4vec = iptr + fdz_indx[n] * siz_line;
+            iptr4vec = iptr + fdz_indx[n] * siz_iz;
             veczt[n] = jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txx[iptr4vec]
                                           + zt_z[iptr4vec] * Txz[iptr4vec] );
           }
@@ -112,7 +112,7 @@ sv_curv_col_el_rhs_timg_z2(
           {
             int n_img = fdz_indx[n] - 2*(n-n_free);
             //int n_img = n_free-(n-n_free);
-            iptr4vec = iptr + n_img * siz_line;
+            iptr4vec = iptr + n_img * siz_iz;
             veczt[n] = -jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txx[iptr4vec]
                                            + zt_z[iptr4vec] * Txz[iptr4vec] );
             //veczt[n] = -veczt[n_free-(n-n_free)];
@@ -137,7 +137,7 @@ sv_curv_col_el_rhs_timg_z2(
 
           // blow surface -> cal
           for (n=0; n<n_free; n++) {
-            iptr4vec = iptr + fdz_indx[n] * siz_line;
+            iptr4vec = iptr + fdz_indx[n] * siz_iz;
             veczt[n] = jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txz[iptr4vec]
                                           + zt_z[iptr4vec] * Tzz[iptr4vec] );
           }
@@ -148,7 +148,7 @@ sv_curv_col_el_rhs_timg_z2(
           // above surface -> mirror
           for (n=n_free+1; n<fdz_len; n++) {
             int n_img = fdz_indx[n] - 2*(n-n_free);
-            iptr4vec = iptr + n_img * siz_line;
+            iptr4vec = iptr + n_img * siz_iz;
             veczt[n] = -jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txz[iptr4vec]
                                            + zt_z[iptr4vec] * Tzz[iptr4vec] );
           }
@@ -255,13 +255,13 @@ sv_curv_graves_Qs(float *w, int ncmp, float dt, gd_t *gd, md_t *md)
 
   for (int icmp=0; icmp<ncmp; icmp++)
   {
-    float *__restrict__ var = w + icmp * gd->siz_slice;
+    float *__restrict__ var = w + icmp * gd->siz_icmp;
 
     for (int k = gd->nk1; k <= gd->nk2; k++)
     {
         for (int i = gd->ni1; i <= gd->ni2; i++)
         {
-          size_t iptr = i + k * gd->siz_line;
+          size_t iptr = i + k * gd->siz_iz;
 
           float Qatt = expf( coef / md->Qs[iptr] );
 

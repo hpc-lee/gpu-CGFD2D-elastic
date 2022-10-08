@@ -43,7 +43,7 @@ sv_curv_col_el_vti_rhs_inner(
                float *__restrict__ c33d, float *__restrict__ c55d,
                float *__restrict__ slw3d,
                int ni1, int ni2, int nk1, int nk2,
-               size_t siz_line,
+               size_t siz_iz,
                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                const int verbose);
@@ -60,7 +60,7 @@ sv_curv_col_el_vti_rhs_vlow_z2(
                float *__restrict__ slw3d,
                float *__restrict__ vecVx2Vz,
                int ni1, int ni2, int nk1, int nk2,
-               size_t siz_line,
+               size_t siz_iz,
                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                int num_of_fdz_op, fd_op_t *fdz_op, int fdz_max_len,
                const int verbose);
@@ -78,7 +78,7 @@ sv_curv_col_el_vti_rhs_cfspml(
                float *__restrict__ c11d, float *__restrict__ c13d,
                float *__restrict__ c33d, float *__restrict__ c55d,
                float *__restrict__ slw3d,
-               int nk2, size_t siz_line,
+               int nk2, size_t siz_iz,
                int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
                int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
                bdry_t *bdry,

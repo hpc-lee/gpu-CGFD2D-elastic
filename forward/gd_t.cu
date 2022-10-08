@@ -30,12 +30,12 @@ gd_curv_init(gd_t *gdcurv)
 
   gdcurv->ncmp = CONST_NDIM;
 
-  gdcurv->siz_line   = gdcurv->nx;
-  gdcurv->siz_slice = gdcurv->nx * gdcurv->nz;
+  gdcurv->siz_iz   = gdcurv->nx;
+  gdcurv->siz_icmp = gdcurv->nx * gdcurv->nz;
   
   // vars
   gdcurv->v3d = (float *) fdlib_mem_calloc_1d_float(
-                  gdcurv->siz_slice * gdcurv->ncmp, 0.0, "gd_curv_init");
+                  gdcurv->siz_icmp * gdcurv->ncmp, 0.0, "gd_curv_init");
   if (gdcurv->v3d == NULL) {
       fprintf(stderr,"Error: failed to alloc coord vars\n");
       fflush(stderr);
@@ -53,12 +53,12 @@ gd_curv_init(gd_t *gdcurv)
   
   // set value
   int icmp = 0;
-  cmp_pos[icmp] = icmp * gdcurv->siz_slice;
+  cmp_pos[icmp] = icmp * gdcurv->siz_icmp;
   sprintf(cmp_name[icmp],"%s","x");
   gdcurv->x2d = gdcurv->v3d + cmp_pos[icmp];
 
   icmp += 1;
-  cmp_pos[icmp] = icmp * gdcurv->siz_slice;
+  cmp_pos[icmp] = icmp * gdcurv->siz_icmp;
   sprintf(cmp_name[icmp],"%s","z");
   gdcurv->z2d = gdcurv->v3d + cmp_pos[icmp];
   
@@ -84,12 +84,12 @@ gd_curv_metric_init(gd_t        *gdcurv,
   metric->nz   = gdcurv->nz;
   metric->ncmp = num_grid_vars;
 
-  metric->siz_line   = metric->nx;
-  metric->siz_slice  = metric->nx * metric->nz;
+  metric->siz_iz   = metric->nx;
+  metric->siz_icmp  = metric->nx * metric->nz;
   
   // vars
   metric->v3d = (float *) fdlib_mem_calloc_1d_float(
-                  metric->siz_slice * metric->ncmp, 0.0, "gd_curv_init_g3d");
+                  metric->siz_icmp * metric->ncmp, 0.0, "gd_curv_init_g3d");
   if (metric->v3d == NULL) {
       fprintf(stderr,"Error: failed to alloc metric vars\n");
       fflush(stderr);
@@ -108,7 +108,7 @@ gd_curv_metric_init(gd_t        *gdcurv,
   // set value
   for (int icmp=0; icmp < metric->ncmp; icmp++)
   {
-    cmp_pos[icmp] = icmp * metric->siz_slice;
+    cmp_pos[icmp] = icmp * metric->siz_icmp;
   }
 
   int icmp = 0;
@@ -150,7 +150,7 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   int nk2 = gdcurv->nk2;
   int nx  = gdcurv->nx;
   int nz  = gdcurv->nz;
-  size_t siz_line  = gdcurv->siz_line;
+  size_t siz_iz  = gdcurv->siz_iz;
 
   // point to each var
   float *__restrict__ x2d  = gdcurv->x2d;
@@ -175,13 +175,13 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   for (int k=0; k < fd_len; k++) {
     lfd_coef [k] = fd_coef[k];
     lfdx_shift[k] = fd_indx[k]            ;
-    lfdz_shift[k] = fd_indx[k] * siz_line;
+    lfdz_shift[k] = fd_indx[k] * siz_iz;
   }
 
   for (size_t k = nk1; k <= nk2; k++){
       for (size_t i = ni1; i <= ni2; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
 
         x_xi = 0.0; x_zt = 0.0;
         z_xi = 0.0; z_zt = 0.0;
@@ -219,7 +219,7 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   for (size_t k = 0; k < nz; k++){
       for (size_t i = 0; i < ni1; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
         jac2d[iptr] = jac2d[iptr + (ni1-i)*2 -1 ];
          xi_x[iptr] =  xi_x[iptr + (ni1-i)*2 -1 ];
          xi_z[iptr] =  xi_z[iptr + (ni1-i)*2 -1 ];
@@ -231,7 +231,7 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   for (size_t k = 0; k < nz; k++){
       for (size_t i = ni2+1; i < nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
         jac2d[iptr] = jac2d[iptr - (i-ni2)*2 +1 ];
          xi_x[iptr] =  xi_x[iptr - (i-ni2)*2 +1 ];
          xi_z[iptr] =  xi_z[iptr - (i-ni2)*2 +1 ];
@@ -242,23 +242,23 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   // z1, mirror
   for (size_t k = 0; k < nk1; k++) {
       for (size_t i = 0; i < nx; i++) {
-        size_t iptr = i + k * siz_line;
-        jac2d[iptr] = jac2d[iptr + ((nk1-k)*2 -1) * siz_line ];
-         xi_x[iptr] =  xi_x[iptr + ((nk1-k)*2 -1) * siz_line ];
-         xi_z[iptr] =  xi_z[iptr + ((nk1-k)*2 -1) * siz_line ];
-         zt_x[iptr] =  zt_x[iptr + ((nk1-k)*2 -1) * siz_line ];
-         zt_z[iptr] =  zt_z[iptr + ((nk1-k)*2 -1) * siz_line ];
+        size_t iptr = i + k * siz_iz;
+        jac2d[iptr] = jac2d[iptr + ((nk1-k)*2 -1) * siz_iz ];
+         xi_x[iptr] =  xi_x[iptr + ((nk1-k)*2 -1) * siz_iz ];
+         xi_z[iptr] =  xi_z[iptr + ((nk1-k)*2 -1) * siz_iz ];
+         zt_x[iptr] =  zt_x[iptr + ((nk1-k)*2 -1) * siz_iz ];
+         zt_z[iptr] =  zt_z[iptr + ((nk1-k)*2 -1) * siz_iz ];
       }
   }
   // z2, mirror
   for (size_t k = nk2+1; k < nz; k++) {
       for (size_t i = 0; i < nx; i++) {
-        size_t iptr = i + k * siz_line;
-        jac2d[iptr] = jac2d[iptr - ((k-nk2)*2 -1) * siz_line ];
-         xi_x[iptr] =  xi_x[iptr - ((k-nk2)*2 -1) * siz_line ];
-         xi_z[iptr] =  xi_z[iptr - ((k-nk2)*2 -1) * siz_line ];
-         zt_x[iptr] =  zt_x[iptr - ((k-nk2)*2 -1) * siz_line ];
-         zt_z[iptr] =  zt_z[iptr - ((k-nk2)*2 -1) * siz_line ];
+        size_t iptr = i + k * siz_iz;
+        jac2d[iptr] = jac2d[iptr - ((k-nk2)*2 -1) * siz_iz ];
+         xi_x[iptr] =  xi_x[iptr - ((k-nk2)*2 -1) * siz_iz ];
+         xi_z[iptr] =  xi_z[iptr - ((k-nk2)*2 -1) * siz_iz ];
+         zt_x[iptr] =  zt_x[iptr - ((k-nk2)*2 -1) * siz_iz ];
+         zt_z[iptr] =  zt_z[iptr - ((k-nk2)*2 -1) * siz_iz ];
       }
   }
 
@@ -313,8 +313,8 @@ gd_cart_init_set(gd_t *gdcart,
   gdcart->nz   = gdcart->nz;
   gdcart->ncmp = CONST_NDIM;
 
-  gdcart->siz_line   = gdcart->nx;
-  gdcart->siz_slice = gdcart->nx * gdcart->nz;
+  gdcart->siz_iz   = gdcart->nx;
+  gdcart->siz_icmp = gdcart->nx * gdcart->nz;
   
   // vars
   float *x1d = (float *) fdlib_mem_calloc_1d_float(
@@ -698,15 +698,15 @@ gd_curv_gen_layer(char *in_grid_layer_file,
   // read number of horizontal sampling
   fscanf(fp,"%d",&nx_layers);
 
-  size_t siz_slice_layerIn = nx_layers * (nLayers+1) ;  
+  size_t siz_icmp_layerIn = nx_layers * (nLayers+1) ;  
   float * layer2d_In        = NULL;
-  layer2d_In = (float *)fdlib_mem_malloc_1d(siz_slice_layerIn * 2 * sizeof(float), 
+  layer2d_In = (float *)fdlib_mem_malloc_1d(siz_icmp_layerIn * 2 * sizeof(float), 
                                                               "gd_curv_gen_layer");
-  for ( int i=0; i<siz_slice_layerIn; i++)
+  for ( int i=0; i<siz_icmp_layerIn; i++)
   {
     // read x,z of each sample
     fscanf(fp,"%f",&layer2d_In[i                     ]);
-    fscanf(fp,"%f",&layer2d_In[i + siz_slice_layerIn ]);
+    fscanf(fp,"%f",&layer2d_In[i + siz_icmp_layerIn ]);
   }
   fclose( fp );
 
@@ -821,9 +821,9 @@ gd_curv_gen_layer(char *in_grid_layer_file,
   }
 
   // resample based on interp_factor on input grid layer
-  size_t siz_slice_layer_interp = nx_interp * (nLayers + 1);
+  size_t siz_icmp_layer_interp = nx_interp * (nLayers + 1);
   float *layer2d_interp = NULL;
-  layer2d_interp = (float *)fdlib_mem_malloc_1d(siz_slice_layer_interp * 2 * sizeof(float),"gd_curv_gen_layer"); 
+  layer2d_interp = (float *)fdlib_mem_malloc_1d(siz_icmp_layer_interp * 2 * sizeof(float),"gd_curv_gen_layer"); 
   
   // 
   float   *xi_lenX = NULL;
@@ -851,7 +851,7 @@ gd_curv_gen_layer(char *in_grid_layer_file,
         iptr2 = M_gd_INDEX(ii * x_interp_factor,  kk, nx_layers);
 
         layer2d_interp[ iptr1                        ] = layer2d_In[ iptr2 ];
-        layer2d_interp[ iptr1 +siz_slice_layer_interp] = layer2d_In[ iptr2 +siz_slice_layerIn]; 
+        layer2d_interp[ iptr1 +siz_icmp_layer_interp] = layer2d_In[ iptr2 +siz_icmp_layerIn]; 
       }
     }
   }
@@ -865,7 +865,7 @@ gd_curv_gen_layer(char *in_grid_layer_file,
       for ( int ii1=0; ii1<nx_layers; ii1++)
       {
         yn_x_lenX[ii1] = layer2d_In[M_gd_INDEX(ii1, kk, nx_layers)                     ];
-        yn_z_lenX[ii1] = layer2d_In[M_gd_INDEX(ii1, kk, nx_layers) + siz_slice_layerIn ];
+        yn_z_lenX[ii1] = layer2d_In[M_gd_INDEX(ii1, kk, nx_layers) + siz_icmp_layerIn ];
       }
 
       gd_SPL(nx_layers, xn_lenX, yn_x_lenX, nx_interp, xi_lenX, yi_x_lenX);
@@ -875,7 +875,7 @@ gd_curv_gen_layer(char *in_grid_layer_file,
       {
           iptr1 = M_gd_INDEX(ii, kk, nx_interp);
           layer2d_interp[iptr1] = yi_x_lenX[ii];
-          layer2d_interp[iptr1 + siz_slice_layer_interp] = yi_z_lenX[ii];
+          layer2d_interp[iptr1 + siz_icmp_layer_interp] = yi_z_lenX[ii];
       }
     }
   }
@@ -919,7 +919,7 @@ gd_curv_gen_layer(char *in_grid_layer_file,
       iptr1 = M_gd_INDEX(i, k, nx);
       iptr2 = M_gd_INDEX(i + x_gd_first, k, nx_interp);
       xlayer2d[iptr1] = layer2d_interp[iptr2];
-      zlayer2d[iptr1] = layer2d_interp[iptr2 + siz_slice_layer_interp];
+      zlayer2d[iptr1] = layer2d_interp[iptr2 + siz_icmp_layer_interp];
     }
   }
 
@@ -1191,7 +1191,7 @@ gd_curv_set_minmax(gd_t *gdcurv)
   float xmin = gdcurv->x2d[0], xmax = gdcurv->x2d[0];
   float zmin = gdcurv->z2d[0], zmax = gdcurv->z2d[0];
   
-  for (size_t i = 0; i < gdcurv->siz_slice; i++){
+  for (size_t i = 0; i < gdcurv->siz_icmp; i++){
       xmin = xmin < gdcurv->x2d[i] ? xmin : gdcurv->x2d[i];
       xmax = xmax > gdcurv->x2d[i] ? xmax : gdcurv->x2d[i];
       zmin = zmin < gdcurv->z2d[i] ? zmin : gdcurv->z2d[i];
@@ -1253,7 +1253,7 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   int ni2 = gd->ni2;
   int nk1 = gd->nk1;
   int nk2 = gd->nk2;
-  size_t siz_line = gd->siz_line;
+  size_t siz_iz = gd->siz_iz;
 
   float *__restrict__ x3d = gd->x2d;
   float *__restrict__ z3d = gd->z2d;
@@ -1276,7 +1276,7 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   for (int k=0; k<nz; k++) {
       for (int i=0; i<nx; i++)
       {
-        size_t iptr = i + k * siz_line;
+        size_t iptr = i + k * siz_iz;
 
         float x = x3d[iptr];
         float z = z3d[iptr];
@@ -1320,7 +1320,7 @@ gd_curv_coord_to_local_indx(gd_t *gd,
         for (int n3=0; n3<2; n3++) {
             for (int n1=0; n1<2; n1++) {
               int iptr_cube = n1 + n3 * 2;
-              int iptr = (cur_i+n1)  + (cur_k+n3) * siz_line;
+              int iptr = (cur_i+n1)  + (cur_k+n3) * siz_iz;
               points_x[iptr_cube] = x3d[iptr];
               points_z[iptr_cube] = z3d[iptr];
               points_i[iptr_cube] = cur_i+n1;
@@ -1496,7 +1496,7 @@ gd_coord_get_x(gd_t *gd, int i, int k)
   }
   else if (gd->type == GD_TYPE_CURV)
   {
-    size_t iptr = i + k * gd->siz_line;
+    size_t iptr = i + k * gd->siz_iz;
     var = gd->x2d[iptr];
   }
 
@@ -1514,7 +1514,7 @@ gd_coord_get_z(gd_t *gd, int i, int k)
   }
   else if (gd->type == GD_TYPE_CURV)
   {
-    size_t iptr = i + k * gd->siz_line;
+    size_t iptr = i + k * gd->siz_iz;
     var = gd->z2d[iptr];
   }
 
@@ -1560,8 +1560,8 @@ gd_indx_set(gd_t *const gd,
   gd->gnk1 = 0;
   gd->gnk2 = gd->gnk1 + nk - 1;
 
-  gd->siz_line  = gd->nx;
-  gd->siz_slice = gd->nx * gd->nz;
+  gd->siz_iz  = gd->nx;
+  gd->siz_icmp = gd->nx * gd->nz;
 
   // set npoint_ghosts according to fdz_nghosts
   gd->npoint_ghosts = fdz_nghosts;

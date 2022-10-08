@@ -24,9 +24,9 @@ wav_init(gd_t *gd,
   V->nz   = gd->nz;
   V->nlevel = number_of_levels;
 
-  V->siz_line   = V->nx;
-  V->siz_slice  = V->nx * V->nz;
-  V->siz_ilevel = V->siz_slice * V->ncmp;
+  V->siz_iz   = V->nx;
+  V->siz_icmp  = V->nx * V->nz;
+  V->siz_ilevel = V->siz_icmp * V->ncmp;
 
   // vars
   // 2 Vi, 3 Tij, 4 rk stages
@@ -42,7 +42,7 @@ wav_init(gd_t *gd,
   // set value
   for (int icmp=0; icmp < V->ncmp; icmp++)
   {
-    cmp_pos[icmp] = icmp * V->siz_slice;
+    cmp_pos[icmp] = icmp * V->siz_icmp;
   }
 
   // set values
@@ -99,9 +99,9 @@ wav_ac_init(gd_t *gd,
   V->nz   = gd->nz;
   V->nlevel = number_of_levels;
 
-  V->siz_line   = V->nx;
-  V->siz_slice  = V->nx * V->nz;
-  V->siz_ilevel = V->siz_slice * V->ncmp;
+  V->siz_iz   = V->nx;
+  V->siz_icmp  = V->nx * V->nz;
+  V->siz_ilevel = V->siz_icmp * V->ncmp;
 
   // vars
   // 2 Vi, 1 P, 4 rk stages
@@ -117,7 +117,7 @@ wav_ac_init(gd_t *gd,
   // set value
   for (int icmp=0; icmp < V->ncmp; icmp++)
   {
-    cmp_pos[icmp] = icmp * V->siz_slice;
+    cmp_pos[icmp] = icmp * V->siz_icmp;
   }
 
   // set values
@@ -157,8 +157,8 @@ wav_check_value(float *__restrict__ w, wav_t *wav)
 
   for (int icmp=0; icmp < wav->ncmp; icmp++)
   {
-    float *ptr = w + icmp * wav->siz_slice;
-    for (size_t iptr=0; iptr < wav->siz_slice; iptr++)
+    float *ptr = w + icmp * wav->siz_icmp;
+    for (size_t iptr=0; iptr < wav->siz_icmp; iptr++)
     {
       if (ptr[iptr] != ptr[iptr])
       {
@@ -184,7 +184,7 @@ wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
     // z1
     for (int k=0; k < gd->nk1; k++)
     {
-      size_t iptr_k = k * gd->siz_line;
+      size_t iptr_k = k * gd->siz_iz;
         for (int i=0; i < gd->nx; i++)
         {
           size_t iptr = iptr_k + i;
@@ -195,7 +195,7 @@ wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
     // z2
     for (int k=gd->nk2+1; k < gd->nz; k++)
     {
-      size_t iptr_k = k * gd->siz_line;
+      size_t iptr_k = k * gd->siz_iz;
         for (int i=0; i < gd->nx; i++)
         {
           size_t iptr = iptr_k + i;
@@ -206,7 +206,7 @@ wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
     // x1
     for (int k = gd->nk1; k <= gd->nk2; k++)
     {
-      size_t iptr_k = k * gd->siz_line;
+      size_t iptr_k = k * gd->siz_iz;
         for (int i=0; i < gd->ni1; i++)
         {
           size_t iptr = iptr_k + i;
@@ -217,7 +217,7 @@ wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
     // x2
     for (int k = gd->nk1; k <= gd->nk2; k++)
     {
-      size_t iptr_k = k * gd->siz_line;
+      size_t iptr_k = k * gd->siz_iz;
         for (int i = gd->ni2+1; i < gd->nx; i++)
         {
           size_t iptr = iptr_k + i;

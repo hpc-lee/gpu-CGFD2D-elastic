@@ -185,7 +185,7 @@ blk_dt_esti_curv(gd_t *gdcurv, md_t *md,
   {
       for (int i = gdcurv->ni1; i <= gdcurv->ni2; i++)
       {
-        size_t iptr = i + k * gdcurv->siz_line;
+        size_t iptr = i + k * gdcurv->siz_iz;
 
         if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
           Vp = sqrt( (md->lambda[iptr] + 2.0 * md->mu[iptr]) / md->rho[iptr] );
@@ -210,8 +210,8 @@ blk_dt_esti_curv(gd_t *gdcurv, md_t *md,
               if (ii != 0 && kk != 0)
               {
                 float p1[] = { x2d[iptr-ii], z2d[iptr-ii] };
-                float p2[] = { x2d[iptr-kk*gdcurv->siz_line],
-                               z2d[iptr-kk*gdcurv->siz_line] };
+                float p2[] = { x2d[iptr-kk*gdcurv->siz_iz],
+                               z2d[iptr-kk*gdcurv->siz_iz] };
 
                 float L = fdlib_math_dist_point2line(x0, z0, p1, p2);
 
@@ -262,7 +262,7 @@ blk_dt_esti_cart(gd_t *gdcart, md_t *md,
   {
       for (int i = gdcart->ni1; i <= gdcart->ni2; i++)
       {
-        size_t iptr = i + k * gdcart->siz_line;
+        size_t iptr = i + k * gdcart->siz_iz;
 
         if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
           Vp = sqrt( (md->lambda[iptr] + 2.0 * md->mu[iptr]) / md->rho[iptr] );

@@ -10,12 +10,13 @@
 #include "fdlib_mem.h"
 #include "fdlib_math.h"
 #include "blk_t.h"
-#include "drv_rk_curv_col.h"
-#include "sv_curv_col_el.h"
-#include "sv_curv_col_el_iso.h"
-#include "sv_curv_col_el_vti.h"
-#include "sv_curv_col_el_aniso.h"
-#include "sv_curv_col_ac_iso.h"
+#include "sv_curv_col_el_gpu.h"
+#include "sv_curv_col_el_iso_gpu.h"
+#include "sv_curv_col_el_vti_gpu.h"
+#include "sv_curv_col_el_aniso_gpu.h"
+#include "sv_curv_col_ac_iso_gpu.h"
+#include "alloc.h"
+#include "cuda_common.h"
 
 /*******************************************************************************
  * one simulation over all time steps, could be used in imaging or inversion
@@ -46,24 +47,52 @@ drv_rk_curv_col_allstep(
   float *rk_b = fd->rk_b;
 
   int num_of_pairs     = fd->num_of_pairs;
-  int fdx_max_half_len = fd->fdx_max_half_len;
   int fdz_max_len      = fd->fdz_max_len;
   int num_of_fdz_op    = fd->num_of_fdz_op;
+
+  //gdinfo
+  int ni = gd->ni;
+  int nk = gd->nk;
 
   // local allocated array
   char ou_file[CONST_MAX_STRLEN];
 
+  gd_t   gd_d;
+  md_t   md_d;
+  src_t  src_d;
+  wav_t  wav_d;
+  bdry_t  bdry_d;
+  gdcurv_metric_t metric_d;
+  fd_wav_t fd_wav_d;
+
+  // init device struct, and copy data from host to device
+  init_gdinfo_device(gd, &gd_d);
+  init_md_device(md, &md_d);
+  init_fd_device(fd, &fd_wav_d);
+  init_src_device(src, &src_d);
+  init_metric_device(metric, &metric_d);
+  init_bdry_device(gd, bdry, &bdry_d);
+  init_wave_device(wav, &wav_d);
+  //---------------------------------------
+  // get device wavefield 
+  float *__restrict__ w_buff = wav->v4d; // size number is V->siz_icmp * (V->ncmp+6)
+
   // local pointer
-  float *__restrict__ w_cur;
-  float *__restrict__ w_pre;
-  float *__restrict__ w_rhs;
-  float *__restrict__ w_end;
-  float *__restrict__ w_tmp;
+  float *__restrict__ w_cur_d;
+  float *__restrict__ w_pre_d;
+  float *__restrict__ w_rhs_d;
+  float *__restrict__ w_end_d;
+  float *__restrict__ w_tmp_d;
+
+  // get wavefield
+  w_pre_d = wav_d.v4d + wav_d.siz_ilevel * 0; // previous level at n
+  w_tmp_d = wav_d.v4d + wav_d.siz_ilevel * 1; // intermidate value
+  w_rhs_d = wav_d.v4d + wav_d.siz_ilevel * 2; // for rhs
+  w_end_d = wav_d.v4d + wav_d.siz_ilevel * 3; // end level at n+1
 
   int   ipair, istage;
   float t_cur;
   float t_end; // time after this loop for nc output
-  // for mpi message
 
   // create snapshot nc output files
   if (verbose>0) fprintf(stdout,"prepare snap nc output ...\n"); 
@@ -73,43 +102,48 @@ drv_rk_curv_col_allstep(
   } else {
     io_snap_nc_create(iosnap, &iosnap_nc);
   }
-
-  // get wavefield
-  w_pre = wav->v4d + wav->siz_ilevel * 0; // previous level at n
-  w_tmp = wav->v4d + wav->siz_ilevel * 1; // intermidate value
-  w_rhs = wav->v4d + wav->siz_ilevel * 2; // for rhs
-  w_end = wav->v4d + wav->siz_ilevel * 3; // end level at n+1
-
   // set pml for rk
-  if(bdry->is_enable_pml == 1)
+  if(bdry_d.is_enable_pml == 1)
   {
     for (int idim=0; idim<CONST_NDIM; idim++) {
       for (int iside=0; iside<2; iside++) {
-        if (bdry->is_sides_pml[idim][iside]==1) {
-          bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-          auxvar->pre = auxvar->var + auxvar->siz_ilevel * 0;
-          auxvar->tmp = auxvar->var + auxvar->siz_ilevel * 1;
-          auxvar->rhs = auxvar->var + auxvar->siz_ilevel * 2;
-          auxvar->end = auxvar->var + auxvar->siz_ilevel * 3;
+        if (bdry_d.is_sides_pml[idim][iside]==1) {
+          bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
+          auxvar_d->pre = auxvar_d->var + auxvar_d->siz_ilevel * 0;
+          auxvar_d->tmp = auxvar_d->var + auxvar_d->siz_ilevel * 1;
+          auxvar_d->rhs = auxvar_d->var + auxvar_d->siz_ilevel * 2;
+          auxvar_d->end = auxvar_d->var + auxvar_d->siz_ilevel * 3;
         }
       }
     }
   }
 
   // calculate conversion matrix for free surface
-  if (bdry->is_sides_free[CONST_NDIM-1][1] == 1)
+  if (bdry_d.is_sides_free[CONST_NDIM-1][1] == 1)
   {
     if(md->medium_type == CONST_MEDIUM_ELASTIC_ISO)
     {
-      sv_curv_col_el_iso_dvh2dvz(gd,metric,md,bdry,verbose);
+      dim3 block(128);
+      dim3 grid;
+      grid.x = (ni+block.x-1)/block.x;
+      sv_curv_col_el_iso_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      CUDACHECK(cudaDeviceSynchronize());
     } 
     else if(md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) 
     {
-      sv_curv_col_el_aniso_dvh2dvz(gd,metric,md,bdry,verbose);
+      dim3 block(128);
+      dim3 grid;
+      grid.x = (ni+block.x-1)/block.x;
+      sv_curv_col_el_aniso_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      CUDACHECK(cudaDeviceSynchronize());
     }
-    if(md->medium_type == CONST_MEDIUM_ELASTIC_VTI)
+    else if(md->medium_type == CONST_MEDIUM_ELASTIC_VTI)
     {
-      sv_curv_col_el_vti_dvh2dvz(gd,metric,md,bdry,verbose);
+      dim3 block(128);
+      dim3 grid;
+      grid.x = (ni+block.x-1)/block.x;
+      sv_curv_col_el_vti_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      CUDACHECK(cudaDeviceSynchronize());
     } 
     else if(md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) 
     {
@@ -141,69 +175,80 @@ drv_rk_curv_col_allstep(
 
       // use pointer to avoid 1 copy for previous level value
       if (istage==0) {
-        w_cur = w_pre;
-        if(bdry->is_enable_pml == 1)
+        w_cur_d = w_pre_d;
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              bdry->auxvar[idim][iside].cur = bdry->auxvar[idim][iside].pre;
+              bdry_d.auxvar[idim][iside].cur = bdry_d.auxvar[idim][iside].pre;
             }
           }
         }
       }
       else
       {
-        w_cur = w_tmp;
-        if(bdry->is_enable_pml == 1)
+        w_cur_d = w_tmp_d;
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              bdry->auxvar[idim][iside].cur = bdry->auxvar[idim][iside].tmp;
+              bdry_d.auxvar[idim][iside].cur = bdry_d.auxvar[idim][iside].tmp;
             }
           }
         }
       }
 
       // set src_t time
-      src_set_time(src, it, istage);
+      src_set_time(&src_d, it, istage);
 
       // compute rhs
-      if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO)
+      switch (md_d.medium_type)
       {
+        case CONST_MEDIUM_ELASTIC_ISO : {
           sv_curv_col_el_iso_onestage(
-              w_cur,w_rhs,wav,
-              gd, metric, md, bdry, src,
+              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
               fd->fdz_max_len,
               verbose);
-      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI)
-      {
+          break;
+        }
+
+        case CONST_MEDIUM_ELASTIC_VTI : {
           sv_curv_col_el_vti_onestage(
-              w_cur,w_rhs,wav,
-              gd, metric, md, bdry, src,
+              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
               fd->fdz_max_len,
               verbose);
-      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO)
-      {
+          break;
+        }
+
+        case CONST_MEDIUM_ELASTIC_ANISO : {
           sv_curv_col_el_aniso_onestage(
-              w_cur,w_rhs,wav,
-              gd, metric, md, bdry, src,
+              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
               fd->fdz_max_len,
               verbose);
-      } else if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO)
-      {
+          break;
+        }
+
+        case CONST_MEDIUM_ACOUSTIC_ISO : {
           sv_curv_col_ac_iso_onestage(
-              w_cur,w_rhs,wav,
-              gd, metric, md, bdry, src,
+              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
               fd->fdz_max_len,
               verbose);
+          break;
+        }
+        //  synchronize onestage device func.
+        CUDACHECK(cudaDeviceSynchronize());
       }
 
       // rk start
@@ -213,8 +258,11 @@ drv_rk_curv_col_allstep(
         float coef_b = rk_b[istage] * dt;
 
         // wavefield
-        for (size_t iptr=0; iptr < wav->siz_ilevel; iptr++) {
-            w_tmp[iptr] = w_pre[iptr] + coef_a * w_rhs[iptr];
+        {
+          dim3 block(256);
+          dim3 grid;
+          grid.x = (wav_d.siz_ilevel + block.x - 1) / block.x;
+          wav_update <<<grid, block>>> (wav_d.siz_ilevel, coef_a, w_tmp_d, w_pre_d, w_rhs_d);
         }
 
         // apply Qs
@@ -223,34 +271,41 @@ drv_rk_curv_col_allstep(
         //}
 
         // pml_tmp
-        if(bdry->is_enable_pml == 1)
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              if (bdry->is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-                for (size_t iptr=0; iptr < auxvar->siz_ilevel; iptr++) {
-                  auxvar->tmp[iptr] = auxvar->pre[iptr] + coef_a * auxvar->rhs[iptr];
-                }
+              if (bdry_d.is_sides_pml[idim][iside]==1) {
+                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                dim3 block(256);
+                dim3 grid;
+                grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
+                wav_update <<<grid, block>>> (
+                           auxvar_d->siz_ilevel, coef_a, auxvar_d->tmp, auxvar_d->pre, auxvar_d->rhs);
               }
             }
           }
         }
 
         // w_end
-        for (size_t iptr=0; iptr < wav->siz_ilevel; iptr++) {
-            w_end[iptr] = w_pre[iptr] + coef_b * w_rhs[iptr];
+        {
+          dim3 block(256);
+          dim3 grid;
+          grid.x = (wav_d.siz_ilevel + block.x - 1) / block.x;
+          wav_update <<<grid, block>>> (wav_d.siz_ilevel, coef_b, w_end_d, w_pre_d, w_rhs_d);
         }
         // pml_end
-        if(bdry->is_enable_pml == 1)
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              if (bdry->is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-                for (size_t iptr=0; iptr < auxvar->siz_ilevel; iptr++) {
-                  auxvar->end[iptr] = auxvar->pre[iptr] + coef_b * auxvar->rhs[iptr];
-                }
+              if (bdry_d.is_sides_pml[idim][iside]==1) {
+                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                dim3 block(256);
+                dim3 grid;
+                grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
+                wav_update <<<grid, block>>> (
+                           auxvar_d->siz_ilevel, coef_b, auxvar_d->end, auxvar_d->pre, auxvar_d->rhs);
               }
             }
           }
@@ -262,8 +317,11 @@ drv_rk_curv_col_allstep(
         float coef_b = rk_b[istage] * dt;
 
         // wavefield
-        for (size_t iptr=0; iptr < wav->siz_ilevel; iptr++) {
-            w_tmp[iptr] = w_pre[iptr] + coef_a * w_rhs[iptr];
+        {
+          dim3 block(256);
+          dim3 grid;
+          grid.x = (wav_d.siz_ilevel + block.x - 1) / block.x;
+          wav_update <<<grid, block>>> (wav_d.siz_ilevel, coef_a, w_tmp_d, w_pre_d, w_rhs_d);
         }
 
         // apply Qs
@@ -272,34 +330,41 @@ drv_rk_curv_col_allstep(
         //}
 
         // pml_tmp
-        if(bdry->is_enable_pml == 1)
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              if (bdry->is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-                for (size_t iptr=0; iptr < auxvar->siz_ilevel; iptr++) {
-                  auxvar->tmp[iptr] = auxvar->pre[iptr] + coef_a * auxvar->rhs[iptr];
-                }
+              if (bdry_d.is_sides_pml[idim][iside]==1) {
+                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                dim3 block(256);
+                dim3 grid;
+                grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
+                wav_update <<<grid, block>>> (
+                           auxvar_d->siz_ilevel, coef_a, auxvar_d->tmp, auxvar_d->pre, auxvar_d->rhs);
               }
             }
           }
         }
 
         // w_end
-        for (size_t iptr=0; iptr < wav->siz_ilevel; iptr++) {
-            w_end[iptr] += coef_b * w_rhs[iptr];
+        {
+          dim3 block(256);
+          dim3 grid;
+          grid.x = (wav_d.siz_ilevel + block.x - 1) / block.x;
+          wav_update_end <<<grid, block>>> (wav_d.siz_ilevel, coef_b, w_end_d, w_rhs_d);
         }
         // pml_end
-        if(bdry->is_enable_pml == 1)
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              if (bdry->is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-                for (size_t iptr=0; iptr < auxvar->siz_ilevel; iptr++) {
-                  auxvar->end[iptr] += coef_b * auxvar->rhs[iptr];
-                }
+              if (bdry_d.is_sides_pml[idim][iside]==1) {
+                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                dim3 block(256);
+                dim3 grid;
+                grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
+                wav_update_end <<<grid, block>>> (
+                           auxvar_d->siz_ilevel, coef_b, auxvar_d->end, auxvar_d->rhs);
               }
             }
           }
@@ -310,25 +375,30 @@ drv_rk_curv_col_allstep(
         float coef_b = rk_b[istage] * dt;
 
         // wavefield
-        for (size_t iptr=0; iptr < wav->siz_ilevel; iptr++) {
-            w_end[iptr] += coef_b * w_rhs[iptr];
+        {
+          dim3 block(256);
+          dim3 grid;
+          grid.x = (wav_d.siz_ilevel + block.x - 1) / block.x;
+          wav_update_end <<<grid, block>>>(wav_d.siz_ilevel, coef_b, w_end_d, w_rhs_d);
         }
 
         // apply Qs
-        if (md->visco_type == CONST_VISCO_GRAVES_QS) {
-          sv_curv_graves_Qs(w_end, wav->ncmp, dt, gd, md);
-        }
+        //if (md->visco_type == CONST_VISCO_GRAVES_QS) {
+        //  sv_curv_graves_Qs(w_end, wav->ncmp, dt, gd, md);
+        //}
         
         // pml_end
-        if(bdry->is_enable_pml == 1)
+        if(bdry_d.is_enable_pml == 1)
         {
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
-              if (bdry->is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-                for (size_t iptr=0; iptr < auxvar->siz_ilevel; iptr++) {
-                  auxvar->end[iptr] += coef_b * auxvar->rhs[iptr];
-                }
+              if (bdry_d.is_sides_pml[idim][iside]==1) {
+                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                dim3 block(256);
+                dim3 grid;
+                grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
+                wav_update_end <<<grid, block>>> (
+                           auxvar_d->siz_ilevel, coef_b, auxvar_d->end, auxvar_d->rhs);
               }
             }
           }
@@ -349,8 +419,8 @@ drv_rk_curv_col_allstep(
     //--------------------------------------------
     // apply ablexp
     //--------------------------------------------
-    if (bdry->is_enable_ablexp == 1) {
-       bdry_ablexp_apply(bdry, w_end, wav->ncmp, wav->siz_slice);
+    if (bdry_d.is_enable_ablexp == 1) {
+       bdry_ablexp_apply(bdry_d, gd, w_end_d, wav->ncmp);
     }
 
     //--------------------------------------------
@@ -358,39 +428,43 @@ drv_rk_curv_col_allstep(
     //--------------------------------------------
 
     //-- recv by interp
-    io_recv_keep(iorecv, w_end, it, wav->ncmp, wav->siz_slice);
+    io_recv_keep(iorecv, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
 
     //-- line values
-    io_line_keep(ioline, w_end, it, wav->ncmp, wav->siz_slice);
+    io_line_keep(ioline, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
 
     // snapshot
     if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
       io_snap_nc_put_ac(iosnap, &iosnap_nc, gd, wav, 
-                     w_end, w_rhs, nt_total, it, t_end, 1,1,1);
+                     w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
     } else {
       io_snap_nc_put(iosnap, &iosnap_nc, gd, wav, 
-                     w_end, w_rhs, nt_total, it, t_end, 1,1,1);
+                     w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
     }
 
-    // zero temp used w_rsh
-    wav_zero_edge(gd, wav, w_rhs);
-
     // swap w_pre and w_end, avoid copying
-    w_cur = w_pre; w_pre = w_end; w_end = w_cur;
+    w_cur_d = w_pre_d; w_pre_d = w_end_d; w_end_d = w_cur_d;
 
-    if(bdry->is_enable_pml == 1)
+    if(bdry_d.is_enable_pml == 1)
     {
       for (int idim=0; idim<CONST_NDIM; idim++) {
         for (int iside=0; iside<2; iside++) {
-          bdrypml_auxvar_t *auxvar = &(bdry->auxvar[idim][iside]);
-          auxvar->cur = auxvar->pre;
-          auxvar->pre = auxvar->end;
-          auxvar->end = auxvar->cur;
+          bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+          auxvar_d->cur = auxvar_d->pre;
+          auxvar_d->pre = auxvar_d->end;
+          auxvar_d->end = auxvar_d->cur;
         }
       }
     }
 
   } // time loop
+
+  dealloc_md_device(md_d);
+  dealloc_fd_device(fd_wav_d);
+  dealloc_metric_device(metric_d);
+  dealloc_src_device(src_d);
+  dealloc_bdry_device(bdry_d);
+  dealloc_wave_device(wav_d);
 
   // postproc
 

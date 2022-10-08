@@ -216,117 +216,116 @@ int main(int argc, char** argv)
   {
     case PAR_MEDIA_CODE : {
 
-        if (verbose>0) fprintf(stdout,"generate simple medium in code ...\n"); 
+      if (verbose>0) fprintf(stdout,"generate simple medium in code ...\n"); 
 
-        if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
-          md_gen_test_ac_iso(md);
-        }
+      if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
+        md_gen_test_ac_iso(md);
+      }
 
-        if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
-          md_gen_test_el_iso(md);
-        }
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
+        md_gen_test_el_iso(md);
+      }
 
-        if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
-          md_gen_test_el_vti(md);
-        }
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
+        md_gen_test_el_vti(md);
+      }
 
-        if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
-          md_gen_test_el_aniso(md);
-        }
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
+        md_gen_test_el_aniso(md);
+      }
 
-        if (md->visco_type == CONST_VISCO_GRAVES_QS) {
-          md_gen_test_Qs(md, par->visco_Qs_freq);
-        }
+      if (md->visco_type == CONST_VISCO_GRAVES_QS) {
+        md_gen_test_Qs(md, par->visco_Qs_freq);
+      }
 
-        break;
+      break;
     }
     case PAR_MEDIA_IMPORT : {
-        if (verbose>0) fprintf(stdout,"import discrete medium file ...\n"); 
-        md_import(md, par->grid_import_dir);
+      if (verbose>0) fprintf(stdout,"import discrete medium file ...\n"); 
+      md_import(md, par->grid_import_dir);
 
-        break;
+      break;
     }
-    /*
+
     case PAR_MEDIA_2LAY : {
-        if (verbose>0) fprintf(stdout,"read and discretize layer medium file ...\n"); 
+      if (verbose>0) fprintf(stdout,"read and discretize layer medium file ...\n"); 
 
-        if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
-            media_layer2model_el_iso(md->lambda, md->mu, md->rho,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
-            media_layer2model_el_vti(md->rho,
-                    md->c11, md->c33, md->c55, md->c13,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
-            media_layer2model_el_aniso(md->rho,
-                    md->c11, md->c13, md->c15, md->c33, md->c35, md->c55,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
-            media_layer2model_ac_iso(md->rho, md->kappa,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        }
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
+        media_layer2model_el_iso(md->lambda, md->mu, md->rho,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
+        media_layer2model_el_vti(md->rho,
+                md->c11, md->c33, md->c55, md->c13,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
+        media_layer2model_el_aniso(md->rho,
+                md->c11, md->c13, md->c15, md->c33, md->c35, md->c55,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
+        media_layer2model_ac_iso(md->rho, md->kappa,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      }
 
-        break;
+      break;
     }
 
     case PAR_MEDIA_2GRD : {
-        if (verbose>0) fprintf(stdout,"read and descretize grid medium file ...\n"); 
+      if (verbose>0) fprintf(stdout,"read and descretize grid medium file ...\n"); 
 
-        if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
-            media_grid2model_el_iso(md->rho, md->lambda, md->mu,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    gdcurv->xmin, gdcurv->xmax, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
-            media_grid2model_el_vti(md->rho,
-                    md->c11, md->c33, md->c55, md->c13,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    gdcurv->xmin, gdcurv->xmax, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
-            media_grid2model_el_aniso(md->rho,
-                    md->c11, md->c13, md->c15, md->c33, md->c35, md->c55,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    gdcurv->xmin, gdcurv->xmax, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        } else if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
-            media_grid2model_ac_iso(md->rho, md->kappa,
-                    gdcurv->x2d, gdcurv->z2d,
-                    gdcurv->nx, gdcurv->nz, 
-                    gdcurv->xmin, gdcurv->xmax, 
-                    MEDIA_USE_CURV,
-                    par->media_input_file,
-                    par->equivalent_medium_method);
-        }
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO) {
+        media_grid2model_el_iso(md->rho, md->lambda, md->mu,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                gdcurv->xmin, gdcurv->xmax, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_VTI) {
+        media_grid2model_el_vti(md->rho,
+                md->c11, md->c33, md->c55, md->c13,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                gdcurv->xmin, gdcurv->xmax, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) {
+        media_grid2model_el_aniso(md->rho,
+                md->c11, md->c13, md->c15, md->c33, md->c35, md->c55,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                gdcurv->xmin, gdcurv->xmax, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      } else if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
+        media_grid2model_ac_iso(md->rho, md->kappa,
+                gdcurv->x2d, gdcurv->z2d,
+                gdcurv->nx, gdcurv->nz, 
+                gdcurv->xmin, gdcurv->xmax, 
+                MEDIA_USE_CURV,
+                par->media_input_file,
+                par->equivalent_medium_method);
+      }
 
-        break;
+      break;
     }
-    */
   }
 
   // export grid media
@@ -511,7 +510,7 @@ int main(int argc, char** argv)
 //-------------------------------------------------------------------------------
   
   // convert rho to 1 / rho to reduce number of arithmetic cal
-  md_rho_to_slow(md->rho, md->siz_slice);
+  md_rho_to_slow(md->rho, md->siz_icmp);
 
   if (verbose>0) fprintf(stdout,"start solver ...\n"); 
   

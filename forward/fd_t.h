@@ -106,56 +106,8 @@ typedef struct {
   int fdx_max_half_len;
   int fdz_max_half_len;
 
-  ////----------------------------------------------------------------------------
-  //// center schemes at different points to boundary
-  ////----------------------------------------------------------------------------
-
-  //// center scheme can be separated into 1d array as
-  //int    fdx_max_nlay;
-  //int    fdx_max_total;
-  //int   *fdx_num_total;
-  //int   *fdx_num_half;
-  //int   *fdx_num_left;
-  //int   *fdx_num_right;
-  //int   *fdx_indx; // fdx_max_total * fdx_max_nlay
-  //float *fdx_coef;
-
-  ////  fd_ is 2d pointer, the first pointer means the grid layer to free surface (from 0 to fd_len-1),
-  ////  the second pointer points to fd op for that layer, the size could be different, larger than
-  ////  inner op
-  //// not used yet
-  //int    **fdx_all_info; // [k2free][pos, total, half, left, right]
-  //int    **fdx_all_indx;
-  //float  **fdx_all_coef;
-
-  //int    **fdy_all_info;
-  //int    **fdy_all_indx;
-  //float  **fdy_all_coef;
-
-  //int    **fdz_all_info;
-  //int    **fdz_all_indx;
-  //float  **fdz_all_coef;
-
-  ////----------------------------------------------------------------------------
-  //// filter schemes at different points to boundary
-  ////----------------------------------------------------------------------------
-
-  //// not used yet
-
-  //int    **filtx_all_info; // [k2free][pos, total, half, left, right] 
-  //int    **filtx_all_indx;
-  //float  **filtx_all_coef;
-
-  //int    **filty_all_info;
-  //int    **filty_all_indx;
-  //float  **filty_all_coef;
-
-  //int    **filtz_all_info;
-  //int    **filtz_all_indx;
-  //float  **filtz_all_coef;
-
   //----------------------------------------------------------------------------
-  // pairs for 3d space for MacCormack-type schemes
+  // pairs for 2d space for MacCormack-type schemes
   //----------------------------------------------------------------------------
 
   int num_of_pairs;
@@ -169,35 +121,21 @@ typedef struct {
 
 } fd_t;
 
-/*
- * staggered grid scheme
- */
+typedef struct
+{
+  int *fdz_len_d;
+  float *fdx_coef_d;
+  float *fdz_coef_d;
+  float *fdz_coef_all_d;
 
-typedef struct {
-
-  float CFL; // 1d cfl value for the scheme
-
-  // ghost point required 
-  int fdx_nghosts;
-  int fdz_nghosts;
-
-  // max total len of op
-  int fdx_max_len;
-  int fdz_max_len;
-
-  // max half len
-  int fdx_max_half_len;
-  int fdz_max_half_len;
-
-  // number of layers that need to use biased op near boundary
-  int num_of_fdx_op;
-  int num_of_fdz_op;
-
-  // set for integer point
-  fd_op_t *lay_fdx_op;
-  fd_op_t *lay_fdz_op;
-
-} fdstg_t;
+  int *fdx_indx_d;
+  int *fdz_indx_d;
+  int *fdz_indx_all_d;
+  
+  size_t *fdx_shift_d;
+  size_t *fdz_shift_d;
+  size_t *fdz_shift_all_d;
+} fd_wav_t;
 
 /*******************************************************************************
  * function prototype
@@ -208,8 +146,5 @@ fd_set_macdrp(fd_t *fd);
 
 void
 fd_print(fd_t *fd);
-
-int 
-fd_set_stg4(fdstg_t *fd);
 
 #endif

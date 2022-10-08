@@ -62,8 +62,8 @@ typedef struct {
   float xmin, xmax;
   float zmin, zmax;
 
-  size_t siz_line;
-  size_t siz_slice;
+  size_t siz_iz;
+  size_t siz_icmp;
 
   size_t *cmp_pos;
   char  **cmp_name;
@@ -82,8 +82,8 @@ typedef struct {
   float *zeta_x;
   float *zeta_z;
 
-  size_t siz_line;
-  size_t siz_slice;
+  size_t siz_iz;
+  size_t siz_icmp;
 
   size_t *cmp_pos;
   char  **cmp_name;
