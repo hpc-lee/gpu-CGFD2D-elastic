@@ -600,10 +600,10 @@ bdry_ablexp_cal_mask(int i, float vel, float dt, int num_lay, float dh)
 }
 
 int
-bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_icmp)
+bdry_ablexp_apply(bdry_t bdry, float *w_end, int ncmp, size_t siz_icmp)
 {
-  float *Ex = bdry->ablexp_Ex;
-  float *Ez = bdry->ablexp_Ez;
+  float *Ex = bdry.ablexp_Ex;
+  float *Ez = bdry.ablexp_Ez;
 
   int nx = bdry->nx;
   int nz = bdry->nz;

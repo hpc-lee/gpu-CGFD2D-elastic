@@ -53,13 +53,16 @@ wav_init(gd_t *gd,
 int
 wav_check_value(float *__restrict__ w, wav_t *wav);
 
-int
-wav_zero_edge(gd_t *gd, wav_t *wav,
-              float *__restrict__ w4d);
 
 int 
 wav_ac_init(gd_t *gd,
             wav_t *V,
             int number_of_levels);
+
+__global__ void
+wav_update(size_t size, float coef, float *w_update, float *w_input1, float *w_input2);
+
+__global__ void
+wav_update_end(size_t size, float coef, float *w_update, float *w_input2);
 
 #endif

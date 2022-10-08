@@ -172,60 +172,20 @@ wav_check_value(float *__restrict__ w, wav_t *wav)
   return ierr;
 }
 
-int
-wav_zero_edge(gd_t *gd, wav_t *wav, float *__restrict__ w4d)
+__global__ void
+wav_update(size_t size, float coef, float *w_update, float *w_input1, float *w_input2)
 {
-  int ierr = 0;
+  size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+  if(ix<size){
+    w_update[ix] = w_input1[ix] + coef * w_input2[ix];
+  }
+}
 
-  for (int icmp=0; icmp < wav->ncmp; icmp++)
-  {
-    float *__restrict__ var = w4d + wav->cmp_pos[icmp];
-
-    // z1
-    for (int k=0; k < gd->nk1; k++)
-    {
-      size_t iptr_k = k * gd->siz_iz;
-        for (int i=0; i < gd->nx; i++)
-        {
-          size_t iptr = iptr_k + i;
-          var[iptr] = 0.0; 
-        }
-    }
-
-    // z2
-    for (int k=gd->nk2+1; k < gd->nz; k++)
-    {
-      size_t iptr_k = k * gd->siz_iz;
-        for (int i=0; i < gd->nx; i++)
-        {
-          size_t iptr = iptr_k + i;
-          var[iptr] = 0.0; 
-        }
-    }
-
-    // x1
-    for (int k = gd->nk1; k <= gd->nk2; k++)
-    {
-      size_t iptr_k = k * gd->siz_iz;
-        for (int i=0; i < gd->ni1; i++)
-        {
-          size_t iptr = iptr_k + i;
-          var[iptr] = 0.0; 
-        }
-    } 
-
-    // x2
-    for (int k = gd->nk1; k <= gd->nk2; k++)
-    {
-      size_t iptr_k = k * gd->siz_iz;
-        for (int i = gd->ni2+1; i < gd->nx; i++)
-        {
-          size_t iptr = iptr_k + i;
-          var[iptr] = 0.0; 
-        }
-    } 
-
-  } // icmp
-
-  return ierr;
+__global__ void
+wav_update_end(size_t size, float coef, float *w_update, float *w_input2)
+{
+  size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+  if(ix<size){
+    w_update[ix] = w_update[ix] + coef * w_input2[ix];
+  }
 }

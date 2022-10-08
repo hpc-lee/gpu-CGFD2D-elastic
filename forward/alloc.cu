@@ -6,28 +6,9 @@
 #include "cuda_common.h"
 
 
-int init_gdinfo_device(gd_t *gd, gd_t *gd_d)
+int init_gd_device(gd_t *gd, gd_t *gd_d)
 {
   memcpy(gd_d,gd,sizeof(gd_t));
-  return 0;
-}
-
-int init_gdcart_device(gd_t *gdcart, gd_t *gdcart_d)
-{
-  memcpy(gdcart_d,gdcart,sizeof(gd_t));
-  return 0;
-}
-
-int init_gdcurv_device(gd_t *gdcurv, gd_t *gdcurv_d)
-{
-  size_t siz_icmp = gdcurv->siz_icmp;
-  memcpy(gdcurv_d,gdcurv,sizeof(gd_t));
-  gdcurv_d->x2d = (float *) cuda_malloc(sizeof(float)*siz_icmp);
-  gdcurv_d->z2d = (float *) cuda_malloc(sizeof(float)*siz_icmp);
-
-  CUDACHECK(cudaMemcpy(gdcurv_d->x2d, gdcurv->x2d, sizeof(float)*siz_icmp, cudaMemcpyHostToDevice));
-  CUDACHECK(cudaMemcpy(gdcurv_d->z2d, gdcurv->z2d, sizeof(float)*siz_icmp, cudaMemcpyHostToDevice));
-
   return 0;
 }
 

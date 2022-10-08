@@ -23,7 +23,7 @@
   }
 
 // only valid for macdrp etc with len = 5, may be faster? 
-#define M_FD_SHIFT_PTR_MACDRP(deriv, var_ptr, fd_length, fd_shift, fd_coef, n) \
+#define M_FD_SHIFT_PTR_MACDRP(deriv, var_ptr, fd_length, fd_shift, fd_coef) \
   deriv =  fd_coef[0] * *(var_ptr + fd_shift[0])                    \
           +fd_coef[1] * *(var_ptr + fd_shift[1])                    \
           +fd_coef[2] * *(var_ptr + fd_shift[2])                    \

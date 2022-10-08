@@ -66,7 +66,7 @@ drv_rk_curv_col_allstep(
   fd_wav_t fd_wav_d;
 
   // init device struct, and copy data from host to device
-  init_gdinfo_device(gd, &gd_d);
+  init_gd_device(gd, &gd_d);
   init_md_device(md, &md_d);
   init_fd_device(fd, &fd_wav_d);
   init_src_device(src, &src_d);
@@ -121,33 +121,39 @@ drv_rk_curv_col_allstep(
   // calculate conversion matrix for free surface
   if (bdry_d.is_sides_free[CONST_NDIM-1][1] == 1)
   {
-    if(md->medium_type == CONST_MEDIUM_ELASTIC_ISO)
+    if(md_d.medium_type == CONST_MEDIUM_ELASTIC_ISO)
     {
       dim3 block(128);
       dim3 grid;
       grid.x = (ni+block.x-1)/block.x;
-      sv_curv_col_el_iso_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      sv_curv_col_el_iso_dvh2dvz_gpu <<<grid, block>>>(gd_d, metric_d, md_d, bdry_d, verbose);
       CUDACHECK(cudaDeviceSynchronize());
     } 
-    else if(md->medium_type == CONST_MEDIUM_ELASTIC_ANISO) 
+    else if(md_d.medium_type == CONST_MEDIUM_ELASTIC_ANISO) 
     {
       dim3 block(128);
       dim3 grid;
       grid.x = (ni+block.x-1)/block.x;
-      sv_curv_col_el_aniso_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      sv_curv_col_el_aniso_dvh2dvz_gpu <<<grid, block>>>(gd_d, metric_d, md_d, bdry_d, verbose);
       CUDACHECK(cudaDeviceSynchronize());
     }
-    else if(md->medium_type == CONST_MEDIUM_ELASTIC_VTI)
+    else if(md_d.medium_type == CONST_MEDIUM_ELASTIC_VTI)
     {
       dim3 block(128);
       dim3 grid;
       grid.x = (ni+block.x-1)/block.x;
-      sv_curv_col_el_vti_dvh2dvz_gpu(gd_d, metric_d, md_d, bdry_d, verbose);
+      sv_curv_col_el_vti_dvh2dvz_gpu <<<grid, block>>>(gd_d, metric_d, md_d, bdry_d, verbose);
       CUDACHECK(cudaDeviceSynchronize());
     } 
-    else if(md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) 
+    else if(md_d.medium_type == CONST_MEDIUM_ACOUSTIC_ISO) 
     {
       // no need
+    }
+    else
+    {
+      fprintf(stderr,"ERROR: conversion vector for medium_type=%d is not implemented\n",
+                    md->medium_type);
+      exit(-1);
     }
   }
 
@@ -206,7 +212,7 @@ drv_rk_curv_col_allstep(
       {
         case CONST_MEDIUM_ELASTIC_ISO : {
           sv_curv_col_el_iso_onestage(
-              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              w_cur_d, w_rhs_d, wav_d, fd_wav_d,
               gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
@@ -217,7 +223,7 @@ drv_rk_curv_col_allstep(
 
         case CONST_MEDIUM_ELASTIC_VTI : {
           sv_curv_col_el_vti_onestage(
-              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              w_cur_d, w_rhs_d, wav_d, fd_wav_d,
               gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
@@ -228,7 +234,7 @@ drv_rk_curv_col_allstep(
 
         case CONST_MEDIUM_ELASTIC_ANISO : {
           sv_curv_col_el_aniso_onestage(
-              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              w_cur_d, w_rhs_d, wav_d, fd_wav_d,
               gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
@@ -239,7 +245,7 @@ drv_rk_curv_col_allstep(
 
         case CONST_MEDIUM_ACOUSTIC_ISO : {
           sv_curv_col_ac_iso_onestage(
-              w_cur_d,w_rhs_d,wav_d,fd_wav_d,
+              w_cur_d, w_rhs_d, wav_d, fd_wav_d,
               gd_d, metric_d, md_d, bdry_d, src_d,
               fd->num_of_fdx_op, fd->pair_fdx_op[ipair][istage],
               fd->num_of_fdz_op, fd->pair_fdz_op[ipair][istage],
@@ -276,7 +282,7 @@ drv_rk_curv_col_allstep(
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
               if (bdry_d.is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
                 dim3 block(256);
                 dim3 grid;
                 grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
@@ -300,7 +306,7 @@ drv_rk_curv_col_allstep(
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
               if (bdry_d.is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
                 dim3 block(256);
                 dim3 grid;
                 grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
@@ -335,7 +341,7 @@ drv_rk_curv_col_allstep(
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
               if (bdry_d.is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
                 dim3 block(256);
                 dim3 grid;
                 grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
@@ -359,7 +365,7 @@ drv_rk_curv_col_allstep(
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
               if (bdry_d.is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
                 dim3 block(256);
                 dim3 grid;
                 grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
@@ -374,7 +380,7 @@ drv_rk_curv_col_allstep(
       {
         float coef_b = rk_b[istage] * dt;
 
-        // wavefield
+        // w_end
         {
           dim3 block(256);
           dim3 grid;
@@ -393,7 +399,7 @@ drv_rk_curv_col_allstep(
           for (int idim=0; idim<CONST_NDIM; idim++) {
             for (int iside=0; iside<2; iside++) {
               if (bdry_d.is_sides_pml[idim][iside]==1) {
-                bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+                bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
                 dim3 block(256);
                 dim3 grid;
                 grid.x = (auxvar_d->siz_ilevel + block.x - 1) / block.x;
