@@ -4,10 +4,6 @@
 #include "media_geometry2d.hpp"
 #include "media_read_file.hpp"
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 // --- 0. one component
 int media_grid2model_onecmp(
     float *var2d,
@@ -80,10 +76,6 @@ int media_grid2model_el_aniso(
     int grid_type,
     const char *in_media_file,
     const char *equivalent_medium_method);
-
-#ifdef __cplusplus
-}
-#endif
 
 int AssignGridMediaPara2Point(
     size_t ix, size_t iz, 

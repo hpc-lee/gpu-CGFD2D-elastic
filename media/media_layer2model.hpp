@@ -4,10 +4,6 @@
 #include "media_geometry2d.hpp"
 #include "media_utility.hpp"
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 //---- 0. one component
 int media_layer2model_onecmp(float *var2d,
                              const float *x2d, 
@@ -71,10 +67,6 @@ int media_layer2model_el_aniso(
         int grid_type, 
         const char *in_lay_file,
         const char *equivalent_medium_method); 
-
-#ifdef __cplusplus
-}
-#endif
 
 
 int AssignLayerMediaPara2Point(

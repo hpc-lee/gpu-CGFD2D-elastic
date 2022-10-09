@@ -4,8 +4,8 @@ clc;
 addmypath;
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project1/test.json';
-output_dir='../project1/output';
+parfnm='../project/test.json';
+output_dir='../project/output';
 
 % which line to plot (start from index '1')
 lineid=1;

@@ -1,5 +1,7 @@
+rank is 0
+device count is 8
 verbose=100
-par file =  /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/test.json
+par file =  /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/../project/test.json
 -------------------------------------------------------
 -------------------------------------------------------
 --> Time Integration information:
@@ -19,9 +21,9 @@ par file =  /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/test.json
 -------------------------------------------------------
 --> GRID information:
 -------------------------------------------------------
- grid_export_dir = /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/output
- number_of_total_grid_points_x = 1000      
- number_of_total_grid_points_z = 1000      
+ grid_export_dir = /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/../project/output
+ number_of_total_grid_points_x = 400       
+ number_of_total_grid_points_z = 300       
  disg_num_level = 0         
  grid_generation_itype = 2
  cartesian_grid_x0 = 0.0000e+00
@@ -32,22 +34,22 @@ par file =  /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/test.json
 -------------------------------------------------------
 --> media info.
 -------------------------------------------------------
- media_type = elastic_iso
- media_export_dir = /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/output
+ media_type = elastic_aniso
+ media_export_dir = /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/../project/output
 
  --> use internal media funcs
 --> no visco
 -------------------------------------------------------
 --> source info.
 -------------------------------------------------------
- in_source_file = /data3/lihl/code/lihl-CGFD2D-elasitc/example/prep_source/test_source.src
+ in_source_file = /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/prep_source/test_source.src
 
 -------------------------------------------------------
 --> output information.
 -------------------------------------------------------
---> output_dir = /data3/lihl/code/lihl-CGFD2D-elasitc/example/../project1/output
+--> output_dir = /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/../project/output
 --> station list file:
- in_station_file = /data3/lihl/code/lihl-CGFD2D-elasitc/example/prep_station/station.list
+ in_station_file = /data3/lihl/code/gpu-lihl-CGFD2D-elastic/example/prep_station/station.list
 --> recivers lines:
 number_of_receiver_line=2
 #  name  i0  k0   di  dk  count
@@ -56,7 +58,7 @@ number_of_receiver_line=2
 --> snapshot information.
 number_of_snapshot=1
 #  name  i0  k0  ni  nk  di  dk  it0  nt  dit
-     0 volume_vel      0      0   1000   1000      1      1      0      1
+     0 volume_vel      0      0    400    300      1      1      0      1
 --> qc parameters:
 check_nan_every_nummber_of_steps=0
 output_all=0
@@ -74,7 +76,7 @@ allocate media vars ...
 generate simple medium in code ...
 export discrete medium to file ...
    estimate time step ...
--> dtmax=0.030641, Vp=3000.000000, L=70.710678, i=3, k=3
+-> dtmax=0.022427, Vp=4098.780273, L=70.710678, i=3, k=3
 src located results:
 -- 0: indx=(103,103), inc=(0.000000,0.000000)
 allocate solver vars ...
@@ -105,17 +107,17 @@ print blk single:
 -------------------------------------------------------
 --> grid info:
 -------------------------------------------------------
- nx    = 1006      
- nz    = 1006      
- ni    = 1000      
- nk    = 1000      
+ nx    = 406       
+ nz    = 306       
+ ni    = 400       
+ nk    = 300       
  ni1   = 3         
- ni2   = 1002      
+ ni2   = 402       
  nk1   = 3         
- nk2   = 1002      
+ nk2   = 302       
 --> num_of_snap = 1
 #   i0 k0 ni nk di dk it0 dit vel stress strain gi1 gk1
- 0 3 3 1000 1000 1 1 0 1 1 0 0 0
+ 0 3 3 400 300 1 1 0 1 1 1 1 0
 start solver ...
 prepare snap nc output ...
 start time loop ...
@@ -3727,4 +3729,4 @@ start time loop ...
  --> istage=3
 
 
-Runing Time of time :39.000000 s 
+Runing Time of time :5.000000 s 

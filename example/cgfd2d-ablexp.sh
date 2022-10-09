@@ -5,9 +5,6 @@ set -e
 
 date
 
-#-- system related dir
-MPIDIR=/data3/lihl/software/openmpi-gnu-4.1.2
-
 #-- program related dir
 EXEC_WAVE=`pwd`/../main_curv_col_2d
 echo "EXEC_WAVE=$EXEC_WAVE"
