@@ -3,6 +3,7 @@
 
 #include "fdlib_math.h"
 
+__host__ __device__
 void
 fdlib_math_invert2x2(float matrix[2][2])
 {
@@ -30,6 +31,7 @@ fdlib_math_invert2x2(float matrix[2][2])
   return ;
 }
 
+__host__ __device__
 void
 fdlib_math_invert3x3(float m[][3])
 {
@@ -60,6 +62,7 @@ fdlib_math_invert3x3(float m[][3])
   return ;
 }
 
+__host__ __device__
 void
 fdlib_math_matmul2x2(float A[][2], float B[][2], float C[][2])
 {
@@ -74,6 +77,7 @@ fdlib_math_matmul2x2(float A[][2], float B[][2], float C[][2])
   return ;
 }
 
+__host__ __device__
 void
 fdlib_math_matmul3x3(float A[][3], float B[][3], float C[][3])
 {
@@ -88,6 +92,7 @@ fdlib_math_matmul3x3(float A[][3], float B[][3], float C[][3])
   return ;
 }
 
+__host__ __device__
 void
 fdlib_math_cross_product(float *A, float *B, float *C)
 {
@@ -97,6 +102,7 @@ fdlib_math_cross_product(float *A, float *B, float *C)
   return;
 }
 
+__host__ __device__
 float
 fdlib_math_dot_product(float *A, float *B)
 {
@@ -108,6 +114,7 @@ fdlib_math_dot_product(float *A, float *B)
   return result;
 }
 
+__host__ __device__
 float
 fdlib_math_dist_point2plane(float x0[3], float x1[3], float x2[3], float x3[3])
 {
@@ -128,6 +135,7 @@ fdlib_math_dist_point2plane(float x0[3], float x1[3], float x2[3], float x3[3])
   return L;
 }
 
+__host__ __device__
 float
 fdlib_math_dist_point2line(float x0, float z0, float p1[2], float p2[2])
 {
@@ -140,18 +148,10 @@ fdlib_math_dist_point2line(float x0, float z0, float p1[2], float p2[2])
 
   L=fabs((A*x0+B*z0+C)/sqrt(A*A+B*B));
 
-  if (L<1e-6) {
-      fprintf(stderr, "ERROR: L=%g\n", L);
-      fprintf(stderr, "   x0=%g,z0=%g,p1=[%g,%g],p2=[%g,%g]\n", 
-                  x0,z0,p1[0],p1[1],p2[0],p2[1]);
-      fprintf(stderr, "   A,B,C=%g,%g,%g\n", A,B,C);
-      fprintf(stderr, "   A*x0+b*z0+c=%g\n", A*x0+B*z0+C);
-      fprintf(stderr, "   sqrt(A*A+B*B)=\n",sqrt(A*A+B*B));
-  }
-
   return L;
 }
 
+__host__ __device__
 void
 fdlib_math_bubble_sort(float a[], int index[], int n)
 {
@@ -173,6 +173,7 @@ fdlib_math_bubble_sort(float a[], int index[], int n)
     }
 }
 
+__host__ __device__
 void
 fdlib_math_bubble_sort_int(int a[], int index[], int n)
 {
@@ -209,6 +210,7 @@ fdlib_math_bubble_sort_int(int a[], int index[], int n)
  *
  * (anti-clockwise + Judge whether the v->p is on the left side of the edge)
  */
+__host__ __device__
 int
 fdlib_math_isPoint2InQuad(float px, float py, const float *vertx, const float *verty)
 {
@@ -234,6 +236,6 @@ fdlib_math_isPoint2InQuad(float px, float py, const float *vertx, const float *v
             return 0;
     }
 
-    return 1;
+    return 0;
 }
 
