@@ -78,6 +78,6 @@ int
 md_gen_test_el_aniso(md_t *md);
 
 int
-md_rho_to_slow(float *__restrict__ rho, size_t siz_volume);
+md_rho_to_slow(float * rho, size_t siz_icmp);
 
 #endif

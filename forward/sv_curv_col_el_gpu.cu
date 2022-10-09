@@ -18,16 +18,16 @@
  */
 __global__ void
 sv_curv_col_el_rhs_timg_z2_gpu(
-                    float *__restrict__ Txx, float *__restrict__ Tzz,
-                    float *__restrict__ Txz, 
-                    float *__restrict__ hVx,  float *__restrict__ hVz,
-                    float *__restrict__ xi_x, float *__restrict__ xi_z,
-                    float *__restrict__ zt_x, float *__restrict__ zt_z,
-                    float *__restrict__ jac3d, float *__restrict__ slw3d,
-                    int ni1, int ni, int nk1, int nk,
+                    float * Txx, float * Tzz,
+                    float * Txz, 
+                    float * hVx,  float * hVz,
+                    float * xi_x, float * xi_z,
+                    float * zt_x, float * zt_z,
+                    float * jac3d, float * slw3d,
+                    int ni1, int ni, int nk1, int nk2,
                     size_t siz_iz, 
-                    int fdx_len, int *__restrict__ lfdx_indx, float *__restrict__ lfdx_coef,
-                    int fdz_len, int *__restrict__ lfdz_indx, float *__restrict__ lfdz_coef,
+                    int fdx_len, int * lfdx_indx, float * lfdx_coef,
+                    int fdz_len, int * lfdz_indx, float * lfdz_coef,
                     const int verbose)
 {
   // loop var for fd
@@ -46,7 +46,7 @@ sv_curv_col_el_rhs_timg_z2_gpu(
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
 
   // last indx, free surface force Tx/Ty/Tz to 0 in cal
-  int k_min = nk2 - fdz_indx[fdz_len-1];
+  int k_min = nk2 - lfdz_indx[fdz_len-1];
 
   // point affected by timg
   for (size_t k=k_min; k <= nk2; k++)
@@ -54,7 +54,7 @@ sv_curv_col_el_rhs_timg_z2_gpu(
     // k corresponding to 0 index of the fd op
 
     // index of free surface
-    int n_free = nk2 - k - fdz_indx[0]; // first indx is negative
+    int n_free = nk2 - k - lfdz_indx[0]; // first indx is negative
     if(ix<ni)
     {
       size_t iptr = (ix+ni1) + k * siz_iz;
@@ -74,14 +74,14 @@ sv_curv_col_el_rhs_timg_z2_gpu(
 
       // transform to conservative vars
       for (n=0; n<fdx_len; n++) {
-        iptr4vec = iptr + fdx_indx[n];
+        iptr4vec = iptr + lfdx_indx[n];
         vecxi[n] = jac3d[iptr4vec] * (  xi_x[iptr4vec] * Txx[iptr4vec]
                                       + xi_z[iptr4vec] * Txz[iptr4vec] );
       }
 
       // blow surface -> cal
       for (n=0; n<n_free; n++) {
-        iptr4vec = iptr + fdz_indx[n] * siz_iz;
+        iptr4vec = iptr + lfdz_indx[n] * siz_iz;
         veczt[n] = jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txx[iptr4vec]
                                       + zt_z[iptr4vec] * Txz[iptr4vec] );
       }
@@ -92,7 +92,7 @@ sv_curv_col_el_rhs_timg_z2_gpu(
       // above surface -> mirror
       for (n=n_free+1; n<fdz_len; n++)
       {
-        int n_img = fdz_indx[n] - 2*(n-n_free);
+        int n_img = lfdz_indx[n] - 2*(n-n_free);
         //int n_img = n_free-(n-n_free);
         iptr4vec = iptr + n_img * siz_iz;
         veczt[n] = -jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txx[iptr4vec]
@@ -112,14 +112,14 @@ sv_curv_col_el_rhs_timg_z2_gpu(
 
       // transform to conservative vars
       for (n=0; n<fdx_len; n++) {
-        iptr4vec = iptr + fdx_indx[n];
+        iptr4vec = iptr + lfdx_indx[n];
         vecxi[n] = jac3d[iptr4vec] * (  xi_x[iptr4vec] * Txz[iptr4vec]
                                       + xi_z[iptr4vec] * Tzz[iptr4vec] );
       }
 
       // blow surface -> cal
       for (n=0; n<n_free; n++) {
-        iptr4vec = iptr + fdz_indx[n] * siz_iz;
+        iptr4vec = iptr + lfdz_indx[n] * siz_iz;
         veczt[n] = jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txz[iptr4vec]
                                       + zt_z[iptr4vec] * Tzz[iptr4vec] );
       }
@@ -129,7 +129,7 @@ sv_curv_col_el_rhs_timg_z2_gpu(
 
       // above surface -> mirror
       for (n=n_free+1; n<fdz_len; n++) {
-        int n_img = fdz_indx[n] - 2*(n-n_free);
+        int n_img = lfdz_indx[n] - 2*(n-n_free);
         iptr4vec = iptr + n_img * siz_iz;
         veczt[n] = -jac3d[iptr4vec] * (  zt_x[iptr4vec] * Txz[iptr4vec]
                                        + zt_z[iptr4vec] * Tzz[iptr4vec] );
@@ -152,10 +152,10 @@ sv_curv_col_el_rhs_timg_z2_gpu(
 
 __global__ void
 sv_curv_col_el_rhs_src_gpu(
-            float *__restrict__ hVx , float *__restrict__ hVz ,
-            float *__restrict__ hTxx, float *__restrict__ hTzz,
-            float *__restrict__ hTxz, 
-            float *__restrict__ jac3d, float *__restrict__ slw3d,
+            float * hVx , float * hVz ,
+            float * hTxx, float * hTzz,
+            float * hTxz, 
+            float * jac3d, float * slw3d,
             src_t src, 
             const int verbose)
 {
@@ -181,7 +181,7 @@ sv_curv_col_el_rhs_src_gpu(
       int   *ptr_ext_indx = src.ext_indx + ix * max_ext;
       float *ptr_ext_coef = src.ext_coef + ix * max_ext;
       int it_to_it_start = it - it_start;
-      int iptr_cur_stage =   is * src.max_nt * src.max_stage // skip other src
+      int iptr_cur_stage =   ix * src.max_nt * src.max_stage // skip other src
                            + it_to_it_start * src.max_stage // skip other time step
                            + istage;
       if (src.force_actived == 1) {
@@ -216,7 +216,7 @@ sv_curv_col_el_rhs_src_gpu(
     } // it
   } // ix
 
-  return ierr;
+  return;
 }
 
 int
@@ -228,7 +228,7 @@ sv_curv_graves_Qs(float *w, int ncmp, float dt, gd_t *gd, md_t *md)
 
   for (int icmp=0; icmp<ncmp; icmp++)
   {
-    float *__restrict__ var = w + icmp * gd->siz_icmp;
+    float * var = w + icmp * gd->siz_icmp;
 
     for (int k = gd->nk1; k <= gd->nk2; k++)
     {

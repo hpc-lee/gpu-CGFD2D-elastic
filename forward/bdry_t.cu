@@ -600,42 +600,64 @@ bdry_ablexp_cal_mask(int i, float vel, float dt, int num_lay, float dh)
 }
 
 int
-bdry_ablexp_apply(bdry_t bdry, float *w_end, int ncmp, size_t siz_icmp)
+bdry_ablexp_apply(bdry_t bdry, gd_t *gd, float *w_end, int ncmp)
 {
   float *Ex = bdry.ablexp_Ex;
   float *Ez = bdry.ablexp_Ez;
 
-  int nx = bdry->nx;
-  int nz = bdry->nz;
+  size_t siz_iz   = gd->siz_iz;
+  size_t siz_icmp = gd->siz_icmp;
 
-  size_t siz_iz = nx;
-  size_t iptr;
-  float mask;
-
-  bdry_block_t *D = bdry->bdry_blk;
+  bdry_block_t *D = bdry.bdry_blk;
   
-  for (int ivar=0; ivar<ncmp; ivar++)
+  for (int n=0; n < CONST_NDIM_2; n++)
   {
-    float *W = w_end + ivar * siz_icmp;
+    int ni = D[n].ni;
+    int nk = D[n].nk;
+    
+    int ni1 = D[n].ni1;
+    int nk1 = D[n].nk1;
 
-    for (int n=0; n < CONST_NDIM_2; n++)
+    if (D[n].enable == 1)
     {
-      if (D[n].enable == 1)
-      {
-        for (int k = D[n].nk1; k <= D[n].nk2; k++)
-        {
-            for (int i = D[n].ni1; i <= D[n].ni2; i++)
-            {
-              iptr = k * siz_iz + i;
-              mask = (Ex[i]<Ez[k]) ? Ex[i] : Ez[k];
-
-              W[iptr] *= mask;
-            }
-
-          }
-        }
-      }
+      dim3 block(8,8);
+      dim3 grid;
+      grid.x = (ni + block.x - 1) / block.x;
+      grid.y = (nk + block.y - 1) / block.y;
+      bdry_ablexp_apply_gpu<<<grid, block>>> (
+                            Ex, Ez,
+                            w_end, ncmp,
+                            ni1, nk1, ni, nk,
+                            siz_iz, siz_icmp);
     }
+  }
 
   return 0;
 }
+
+__global__ void
+bdry_ablexp_apply_gpu(float *Ex, float *Ez,
+                      float *w_end, int ncmp,
+                      int ni1, int nk1, int ni, int nk,
+                      size_t siz_iz, size_t siz_icmp)
+{
+  size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+  size_t iz = blockIdx.y * blockDim.y + threadIdx.y;
+  float mask;
+  size_t iptr;
+  if(ix<ni && iz<nk)
+  {
+    iptr = (iz+nk1) * siz_iz + (ix+ni1);
+    mask = (Ex[ix+ni1]<Ez[iz+nk1]) ? Ex[ix+ni1] : Ez[iz+nk1];
+    // unroll for accelate
+    // ncmp=5
+    w_end[iptr + 0 * siz_icmp] *= mask;
+    w_end[iptr + 1 * siz_icmp] *= mask;
+    w_end[iptr + 2 * siz_icmp] *= mask;
+    w_end[iptr + 3 * siz_icmp] *= mask;
+    w_end[iptr + 4 * siz_icmp] *= mask;
+  }
+
+  return;
+}
+

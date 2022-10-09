@@ -11,6 +11,7 @@
 #include "fdlib_math.h"
 #include "sv_curv_col_el_gpu.h"
 #include "sv_curv_col_el_iso_gpu.h"
+#include "cuda_common.h"
 
 /*******************************************************************************
  * perform one stage calculation of rhs
@@ -18,8 +19,8 @@
 
 int
 sv_curv_col_el_iso_onestage(
-                  float *__restrict__ w_cur_d,
-                  float *__restrict__ w_rhs_d, 
+                  float * w_cur_d,
+                  float * w_rhs_d, 
                   wav_t  wav_d,
                   fd_wav_t fd_wav_d,
                   gd_t   gd_d,
@@ -34,26 +35,26 @@ sv_curv_col_el_iso_onestage(
                   const int verbose)
 {
   // local pointer get each vars
-  float *__restrict__ Vx    = w_cur_d + wav_d.Vx_pos ;
-  float *__restrict__ Vz    = w_cur_d + wav_d.Vz_pos ;
-  float *__restrict__ Txx   = w_cur_d + wav_d.Txx_pos;
-  float *__restrict__ Tzz   = w_cur_d + wav_d.Tzz_pos;
-  float *__restrict__ Txz   = w_cur_d + wav_d.Txz_pos;
-  float *__restrict__ hVx   = w_rhs_d + wav_d.Vx_pos ; 
-  float *__restrict__ hVz   = w_rhs_d + wav_d.Vz_pos ; 
-  float *__restrict__ hTxx  = w_rhs_d + wav_d.Txx_pos; 
-  float *__restrict__ hTzz  = w_rhs_d + wav_d.Tzz_pos; 
-  float *__restrict__ hTxz  = w_rhs_d + wav_d.Txz_pos; 
+  float * Vx    = w_cur_d + wav_d.Vx_pos ;
+  float * Vz    = w_cur_d + wav_d.Vz_pos ;
+  float * Txx   = w_cur_d + wav_d.Txx_pos;
+  float * Tzz   = w_cur_d + wav_d.Tzz_pos;
+  float * Txz   = w_cur_d + wav_d.Txz_pos;
+  float * hVx   = w_rhs_d + wav_d.Vx_pos ; 
+  float * hVz   = w_rhs_d + wav_d.Vz_pos ; 
+  float * hTxx  = w_rhs_d + wav_d.Txx_pos; 
+  float * hTzz  = w_rhs_d + wav_d.Tzz_pos; 
+  float * hTxz  = w_rhs_d + wav_d.Txz_pos; 
 
-  float *__restrict__ xi_x  = metric_d.xi_x;
-  float *__restrict__ xi_z  = metric_d.xi_z;
-  float *__restrict__ zt_x  = metric_d.zeta_x;
-  float *__restrict__ zt_z  = metric_d.zeta_z;
-  float *__restrict__ jac3d = metric_d.jac;
+  float * xi_x  = metric_d.xi_x;
+  float * xi_z  = metric_d.xi_z;
+  float * zt_x  = metric_d.zeta_x;
+  float * zt_z  = metric_d.zeta_z;
+  float * jac3d = metric_d.jac;
 
-  float *__restrict__ lam3d = md_d.lambda;
-  float *__restrict__  mu3d = md_d.mu;
-  float *__restrict__ slw3d = md_d.rho;
+  float * lam3d = md_d.lambda;
+  float *  mu3d = md_d.mu;
+  float * slw3d = md_d.rho;
 
   // grid size
   int ni1 = gd_d.ni1;
@@ -241,19 +242,19 @@ sv_curv_col_el_iso_onestage(
 
 __global__ void
 sv_curv_col_el_iso_rhs_inner_gpu(
-                float *__restrict__  Vx , float *__restrict__  Vz ,
-                float *__restrict__  Txx, float *__restrict__  Tzz,
-                float *__restrict__  Txz, 
-                float *__restrict__ hVx , float *__restrict__ hVz ,
-                float *__restrict__ hTxx, float *__restrict__ hTzz,
-                float *__restrict__ hTxz, 
-                float *__restrict__ xi_x, float *__restrict__ xi_z,
-                float *__restrict__ zt_x, float *__restrict__ zt_z,
-                float *__restrict__ lam3d, float *__restrict__ mu3d, float *__restrict__ slw3d,
+                float *  Vx , float *  Vz ,
+                float *  Txx, float *  Tzz,
+                float *  Txz, 
+                float * hVx , float * hVz ,
+                float * hTxx, float * hTzz,
+                float * hTxz, 
+                float * xi_x, float * xi_z,
+                float * zt_x, float * zt_z,
+                float * lam3d, float * mu3d, float * slw3d,
                 int ni1, int ni, int nk1, int nk,
                 size_t siz_iz, 
-                int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
-                int fdz_len, int *__restrict__ lfdz_shift, float *__restrict__ lfdz_coef,
+                int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+                int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
                 const int verbose)
 {
   // local var
@@ -262,11 +263,11 @@ sv_curv_col_el_iso_rhs_inner_gpu(
   float lam,mu,lam2mu,slw;
   float xix,xiz,ztx,ztz;
 
-  float *__restrict__ Vx_ptr;
-  float *__restrict__ Vz_ptr;
-  float *__restrict__ Txx_ptr;
-  float *__restrict__ Txz_ptr;
-  float *__restrict__ Tzz_ptr;
+  float * Vx_ptr;
+  float * Vz_ptr;
+  float * Txx_ptr;
+  float * Txz_ptr;
+  float * Tzz_ptr;
 
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
   size_t iz = blockIdx.y * blockDim.y + threadIdx.y;
@@ -345,16 +346,16 @@ sv_curv_col_el_iso_rhs_inner_gpu(
 
 __global__ void
 sv_curv_col_el_iso_rhs_vlow_z2_gpu(
-               float *__restrict__  Vx , float *__restrict__  Vz ,
-               float *__restrict__ hTxx, float *__restrict__ hTzz,
-               float *__restrict__ hTxz, 
-               float *__restrict__ xi_x, float *__restrict__ xi_z,
-               float *__restrict__ zt_x, float *__restrict__ zt_z,
-               float *__restrict__ lam3d, float *__restrict__ mu3d, float *__restrict__ slw3d,
-               float *__restrict__ vecVx2Vz, 
-               int ni1, int ni, int nk1, int nk,
+               float *  Vx , float *  Vz ,
+               float * hTxx, float * hTzz,
+               float * hTxz, 
+               float * xi_x, float * xi_z,
+               float * zt_x, float * zt_z,
+               float * lam3d, float * mu3d, float * slw3d,
+               float * vecVx2Vz, 
+               int ni1, int ni, int nk1, int nk2,
                size_t siz_iz, 
-               int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
+               int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
                int num_of_fdz_op, int fdz_max_len, int * fdz_len,
                float *lfdz_coef_all, size_t *lfdz_shift_all,
                const int verbose)
@@ -370,7 +371,7 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
   float xix,xiz,ztx,ztz;
 
   float lfdz_coef[5] = {0.0};
-  int   lfdz_shift[5] = {0};
+  size_t   lfdz_shift[5] = {0};
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
 
   // loop near surface layers
@@ -408,7 +409,7 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
 
       if (k==nk2) // at surface, convert
       {
-        size_t ij = (i)*4;
+        size_t ij = (ix + ni1)*4;
         DzVx = vecVx2Vz[ij+2*0+0] * DxVx
              + vecVx2Vz[ij+2*0+1] * DxVz;
 
@@ -432,6 +433,7 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
                    xiz*DxVx + xix*DxVz
                   +ztz*DzVx + ztx*DzVz
                   );
+    }
   }
 
   return;
@@ -447,18 +449,18 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
 
 int
 sv_curv_col_el_iso_rhs_cfspml(
-               float *__restrict__  Vx , float *__restrict__  Vz ,
-               float *__restrict__  Txx, float *__restrict__  Tzz,
-               float *__restrict__  Txz, 
-               float *__restrict__ hVx , float *__restrict__ hVz ,
-               float *__restrict__ hTxx, float *__restrict__ hTzz,
-               float *__restrict__ hTxz, 
-               float *__restrict__ xi_x, float *__restrict__ xi_z,
-               float *__restrict__ zt_x, float *__restrict__ zt_z,
-               float *__restrict__ lam3d, float *__restrict__  mu3d, float *__restrict__ slw3d,
+               float *  Vx , float *  Vz ,
+               float *  Txx, float *  Tzz,
+               float *  Txz, 
+               float * hVx , float * hVz ,
+               float * hTxx, float * hTzz,
+               float * hTxz, 
+               float * xi_x, float * xi_z,
+               float * zt_x, float * zt_z,
+               float * lam3d, float *  mu3d, float * slw3d,
                int nk2, size_t siz_iz, 
-               int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
-               int fdz_len, int *__restrict__ lfdz_shift, float *__restrict__ lfdz_coef,
+               int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+               int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
                bdry_t bdry_d,
                const int verbose)
 {
@@ -505,24 +507,24 @@ sv_curv_col_el_iso_rhs_cfspml(
 
 __global__ void
 sv_curv_col_el_iso_rhs_cfspml_gpu(int idim, int iside,
-                                  float *__restrict__ Vx,    float *__restrict__ Vz,
-                                  float *__restrict__ Txx,   float *__restrict__ Tzz, 
-                                  float *__restrict__ Txz, 
-                                  float *__restrict__ hVx,   float *__restrict__ hVz,
-                                  float *__restrict__ hTxx,  float *__restrict__ hTzz, 
-                                  float *__restrict__ hTxz, 
-                                  float *__restrict__ xi_x,  float *__restrict__ xi_z,
-                                  float *__restrict__ zt_x,  float *__restrict__ zt_z,
-                                  float *__restrict__ lam3d, float *__restrict__ mu3d, 
-                                  float *__restrict__ slw3d,
+                                  float * Vx,    float * Vz,
+                                  float * Txx,   float * Tzz, 
+                                  float * Txz, 
+                                  float * hVx,   float * hVz,
+                                  float * hTxx,  float * hTzz, 
+                                  float * hTxz, 
+                                  float * xi_x,  float * xi_z,
+                                  float * zt_x,  float * zt_z,
+                                  float * lam3d, float * mu3d, 
+                                  float * slw3d,
                                   int nk2, size_t siz_iz,
-                                  int fdx_len, size_t *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
-                                  int fdz_len, size_t *__restrict__ lfdz_shift, float *__restrict__ lfdz_coef,
+                                  int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+                                  int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
                                   bdry_t bdry_d, const int verbose)
 {
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
   size_t iz = blockIdx.y * blockDim.y + threadIdx.y;
-  float *vecVx2Vz = bdry->vecVx2Vz2;
+  float *vecVx2Vz = bdry_d.vecVx2Vz2;
 
   // local
   size_t iptr, iptr_a;
@@ -552,27 +554,27 @@ sv_curv_col_el_iso_rhs_cfspml_gpu(int idim, int iside,
 
 
   // get coef for this face
-  float *__restrict__ ptr_coef_A = bdry_d.A[idim][iside];
-  float *__restrict__ ptr_coef_B = bdry_d.B[idim][iside];
-  float *__restrict__ ptr_coef_D = bdry_d.D[idim][iside];
+  float * ptr_coef_A = bdry_d.A[idim][iside];
+  float * ptr_coef_B = bdry_d.B[idim][iside];
+  float * ptr_coef_D = bdry_d.D[idim][iside];
 
   bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
 
   // get pml vars
-  float *__restrict__ abs_vars_cur = auxvar->cur;
-  float *__restrict__ abs_vars_rhs = auxvar->rhs;
+  float * abs_vars_cur = auxvar->cur;
+  float * abs_vars_rhs = auxvar->rhs;
 
-  float *__restrict__ pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
-  float *__restrict__ pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
-  float *__restrict__ pml_Txx  = abs_vars_cur + auxvar->Txx_pos;
-  float *__restrict__ pml_Tzz  = abs_vars_cur + auxvar->Tzz_pos;
-  float *__restrict__ pml_Txz  = abs_vars_cur + auxvar->Txz_pos;
+  float * pml_Vx   = abs_vars_cur + auxvar->Vx_pos;
+  float * pml_Vz   = abs_vars_cur + auxvar->Vz_pos;
+  float * pml_Txx  = abs_vars_cur + auxvar->Txx_pos;
+  float * pml_Tzz  = abs_vars_cur + auxvar->Tzz_pos;
+  float * pml_Txz  = abs_vars_cur + auxvar->Txz_pos;
 
-  float *__restrict__ pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
-  float *__restrict__ pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
-  float *__restrict__ pml_hTxx = abs_vars_rhs + auxvar->Txx_pos;
-  float *__restrict__ pml_hTzz = abs_vars_rhs + auxvar->Tzz_pos;
-  float *__restrict__ pml_hTxz = abs_vars_rhs + auxvar->Txz_pos;
+  float * pml_hVx  = abs_vars_rhs + auxvar->Vx_pos;
+  float * pml_hVz  = abs_vars_rhs + auxvar->Vz_pos;
+  float * pml_hTxx = abs_vars_rhs + auxvar->Txx_pos;
+  float * pml_hTzz = abs_vars_rhs + auxvar->Tzz_pos;
+  float * pml_hTxz = abs_vars_rhs + auxvar->Txz_pos;
 
   // for each dim
   if (idim == 0 ) // x direction
@@ -632,10 +634,10 @@ sv_curv_col_el_iso_rhs_cfspml_gpu(int idim, int iside,
       // add contributions from free surface condition
       //  not consider timg because conflict with main cfspml,
       //     need to revise in the future if required
-      if (bdry_d.is_sides_free[CONST_NDIM-1][1]==1 && k==nk2)
+      if (bdry_d.is_sides_free[CONST_NDIM-1][1]==1 && (iz+abs_nk1)==nk2)
       {
         // zeta derivatives
-        int ij = (i)*4;
+        int ij = (ix+abs_ni1)*4;
         Dx_DzVx = vecVx2Vz[ij+2*0+0] * DxVx
                 + vecVx2Vz[ij+2*0+1] * DxVz;
 
@@ -752,24 +754,23 @@ sv_curv_col_el_iso_dvh2dvz_gpu(gd_t        gd_d,
   size_t siz_iz  = gd_d.siz_iz;
 
   // point to each var
-  float *__restrict__ xi_x = metric_d.xi_x;
-  float *__restrict__ xi_z = metric_d.xi_z;
-  float *__restrict__ zt_x = metric_d.zeta_x;
-  float *__restrict__ zt_z = metric_d.zeta_z;
+  float * xi_x = metric_d.xi_x;
+  float * xi_z = metric_d.xi_z;
+  float * zt_x = metric_d.zeta_x;
+  float * zt_z = metric_d.zeta_z;
 
-  float *__restrict__ lam3d = md_d.lambda;
-  float *__restrict__  mu3d = md_d.mu;
+  float * lam3d = md_d.lambda;
+  float *  mu3d = md_d.mu;
 
   float *vecVx2Vz = bdry_d.vecVx2Vz2;
   
   float A[2][2], B[2][2];
   float AB[2][2];
 
-  int k = nk2;
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
   if(ix<(ni2-ni1+1))
   {
-    size_t iptr = ix + iz * siz_iz;
+    size_t iptr = ix + nk2 * siz_iz;
     float e11 = xi_x[iptr];
     float e12 = xi_z[iptr];
     float e21 = zt_x[iptr];
@@ -794,7 +795,7 @@ sv_curv_col_el_iso_dvh2dvz_gpu(gd_t        gd_d,
 
     fdlib_math_matmul2x2(A, B, AB);
 
-    size_t ij = (i) * 4;
+    size_t ij = (ix+ni1) * 4;
 
     // save into mat
     for(int irow = 0; irow < 2; irow++){

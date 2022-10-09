@@ -20,6 +20,7 @@
 
 #include "media_discrete_model.h"
 #include "drv_rk_curv_col.h"
+#include "cuda_common.h"
 
 int main(int argc, char** argv)
 {
@@ -27,6 +28,10 @@ int main(int argc, char** argv)
   char *par_fname;
   char err_message[CONST_MAX_STRLEN];
 
+//-------------------------------------------------------------------------------
+// initial gpu device before start MPI
+//-------------------------------------------------------------------------------
+  setDeviceBeforeInit();
 //-------------------------------------------------------------------------------
 // get commond-line argument
 //-------------------------------------------------------------------------------

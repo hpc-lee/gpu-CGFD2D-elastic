@@ -9,27 +9,27 @@
  * function prototype
  *************************************************/
 
-int
-sv_curv_col_el_rhs_timg_z2(
-             float *__restrict__  Txx, float *__restrict__  Tzz,
-             float *__restrict__  Txz, 
-             float *__restrict__ hVx , float *__restrict__ hVz ,
-             float *__restrict__ xi_x, float *__restrict__ xi_z,
-             float *__restrict__ zt_x, float *__restrict__ zt_z,
-             float *__restrict__ jac3d, float *__restrict__ slw3d,
-             int ni1, int ni2, int nk1, int nk2,
+__global__ void
+sv_curv_col_el_rhs_timg_z2_gpu(
+             float *  Txx, float *  Tzz,
+             float *  Txz, 
+             float * hVx , float * hVz ,
+             float * xi_x, float * xi_z,
+             float * zt_x, float * zt_z,
+             float * jac3d, float * slw3d,
+             int ni1, int ni, int nk1, int nk2,
              size_t siz_iz,
-             int fdx_len, int *__restrict__ fdx_indx, float *__restrict__ fdx_coef,
-             int fdz_len, int *__restrict__ fdz_indx, float *__restrict__ fdz_coef,
+             int fdx_len, int * fdx_indx, float * fdx_coef,
+             int fdz_len, int * fdz_indx, float * fdz_coef,
              const int verbose);
 
-int
-sv_curv_col_el_rhs_src(
-             float *__restrict__ hVx , float *__restrict__ hVz ,
-             float *__restrict__ hTxx, float *__restrict__ hTzz,
-             float *__restrict__ hTxz, 
-             float *__restrict__ jac3d, float *__restrict__ slw3d,
-             src_t *src, // short nation for reference member
+__global__ void
+sv_curv_col_el_rhs_src_gpu(
+             float * hVx , float * hVz ,
+             float * hTxx, float * hTzz,
+             float * hTxz, 
+             float * jac3d, float * slw3d,
+             src_t src, // short nation for reference member
              const int verbose);
 
 int

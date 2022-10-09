@@ -181,6 +181,12 @@ float
 bdry_ablexp_cal_mask(int i, float vel, float dt, int num_lay, float dh);
 
 int
-bdry_ablexp_apply(bdry_t *bdry, float *w_end, int ncmp, size_t siz_icmp);
+bdry_ablexp_apply(bdry_t bdry, gd_t *gd, float *w_end, int ncmp);
+
+__global__ void
+bdry_ablexp_apply_gpu(float *Ex, float *Ez,
+                      float *w_end, int ncmp,
+                      int ni1, int nk1, int ni, int nk,
+                      size_t siz_iz, size_t siz_icmp);
 
 #endif

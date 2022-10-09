@@ -35,7 +35,7 @@ md_init(gd_t *gd, md_t *md, int media_type, int visco_type)
   {
       md->ncmp = 3; // rho + lambda + mu
   } else if (media_type == CONST_MEDIUM_ELASTIC_VTI) {
-      md->ncmp = 4; // c11 13 33 55 + rho
+      md->ncmp = 5; // c11 13 33 55 + rho
   } else if (media_type == CONST_MEDIUM_ELASTIC_ANISO){
       md->ncmp = 7; // 11, 13, 15, 33, 35, 55, rho
   } else{
@@ -224,8 +224,8 @@ md_export(gd_t  *gd,
 {
   int ierr = 0;
 
-  size_t *__restrict__ m3d_pos   = md->cmp_pos;
-  char  **__restrict__ m3d_name  = md->cmp_name;
+  size_t * m3d_pos   = md->cmp_pos;
+  char  ** m3d_name  = md->cmp_name;
   int  number_of_vars = md->ncmp;
   int  nx = md->nx;
   int  nz = md->nz;
@@ -400,7 +400,7 @@ md_gen_test_el_aniso(md_t *md)
         md->rho[iptr] = rho;
 
 	      //md->c11[iptr] = 25.2*1e9;//lam + 2.0f*mu;
-	      md->c11[iptr] = 2*25.2*1e9;//lam + 2.0f*mu;
+	      md->c11[iptr] = 25.2*1e9;//lam + 2.0f*mu;
 	      md->c13[iptr] = 10.9620*1e9;//lam;
 	      md->c15[iptr] = 0.0;
 	      md->c33[iptr] = 18.0*1e9;//lam + 2.0f*mu;
@@ -444,7 +444,7 @@ md_gen_test_Qs(md_t *md, float Qs_freq)
  */
 
 int
-md_rho_to_slow(float *__restrict__ rho, size_t siz_volume)
+md_rho_to_slow(float * rho, size_t siz_volume)
 {
   int ierr = 0;
 

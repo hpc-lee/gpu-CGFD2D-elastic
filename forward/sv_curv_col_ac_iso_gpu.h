@@ -15,8 +15,8 @@
 
 int
 sv_curv_col_ac_iso_onestage(
-            float *__restrict__ w_cur_d,
-            float *__restrict__ w_rhs_d, 
+            float * w_cur_d,
+            float * w_rhs_d, 
             wav_t  wav_d,
             fd_wav_t  fd_wav_d,
             gd_t   gd_d,
@@ -31,61 +31,74 @@ sv_curv_col_ac_iso_onestage(
             const int verbose);
 
 __global__ void
-sv_curv_col_ac_iso_rhs_inner(
-              float *__restrict__  Vx , float *__restrict__  Vz ,
-              float *__restrict__  P, 
-              float *__restrict__ hVx , float *__restrict__ hVz ,
-              float *__restrict__ hP, 
-              float *__restrict__ xi_x, float *__restrict__ xi_z,
-              float *__restrict__ zt_x, float *__restrict__ zt_z,
-              float *__restrict__ kappa3d, float *__restrict__ slw3d,
+sv_curv_col_ac_iso_rhs_inner_gpu(
+              float *  Vx , float *  Vz ,
+              float *  P, 
+              float * hVx , float * hVz ,
+              float * hP, 
+              float * xi_x, float * xi_z,
+              float * zt_x, float * zt_z,
+              float * kappa3d, float * slw3d,
               int ni1, int ni, int nk1, int nk,
               size_t siz_iz,
-              int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
-              int fdz_len, int *__restrict__ lfdz_shift, float *__restrict__ lfdz_coef,
+              int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+              int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
               const int verbose);
 
 __global__ void
 sv_curv_col_ac_iso_rhs_timg_z2_gpu(
-               float *__restrict__  P,
+               float *  P,
                int ni1, int ni, int nk1, int nk, int nz,
                size_t siz_iz,
                const int verbose);
 
 __global__ void
 sv_curv_col_ac_iso_rhs_vlow_z2_gpu(
-               float *__restrict__  Vx , float *__restrict__  Vz ,
-               float *__restrict__ hP, 
-               float *__restrict__ xi_x, float *__restrict__ xi_z,
-               float *__restrict__ zt_x, float *__restrict__ zt_z,
-               float *__restrict__ kappa3d, float *__restrict__ slw3d,
+               float *  Vx , float *  Vz ,
+               float * hP, 
+               float * xi_x, float * xi_z,
+               float * zt_x, float * zt_z,
+               float * kappa3d, float * slw3d,
                int ni1, int ni, int nk1, int nk,
                size_t siz_iz, 
-               int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
+               int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
                int num_of_fdz_op, int fdz_max_len, int * fdz_len,
                float *lfdz_coef_all, size_t *lfdz_shift_all,
                const int verbose);
 
 int
 sv_curv_col_ac_iso_rhs_cfspml(
-               float *__restrict__  Vx , float *__restrict__  Vz ,
-               float *__restrict__  P, 
-               float *__restrict__ hVx , float *__restrict__ hVz ,
-               float *__restrict__ hP,
-               float *__restrict__ xi_x, float *__restrict__ xi_z,
-               float *__restrict__ zt_x, float *__restrict__ zt_z,
-               float *__restrict__ kappa3d, float *__restrict__ slw3d,
+               float *  Vx , float *  Vz ,
+               float *  P, 
+               float * hVx , float * hVz ,
+               float * hP,
+               float * xi_x, float * xi_z,
+               float * zt_x, float * zt_z,
+               float * kappa3d, float * slw3d,
                int nk2, size_t siz_iz,
-               int fdx_len, int *__restrict__ lfdx_shift, float *__restrict__ lfdx_coef,
-               int fdz_len, int *__restrict__ lfdz_shift, float *__restrict__ lfdz_coef,
+               int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+               int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
                bdry_t bdry_d,
                const int verbose);
+__global__ void
+sv_curv_col_ac_iso_rhs_cfspml_gpu(int idim, int iside,
+                                  float * Vx,    float * Vz,
+                                  float * P, 
+                                  float * hVx,   float * hVz,
+                                  float * hP, 
+                                  float * xi_x,  float * xi_z,
+                                  float * zt_x,  float * zt_z,
+                                  float * kappa3d, float * slw3d,
+                                  int nk2, size_t siz_iz,
+                                  int fdx_len, size_t * lfdx_shift, float * lfdx_coef,
+                                  int fdz_len, size_t * lfdz_shift, float * lfdz_coef,
+                                  bdry_t bdry_d, const int verbose);
 
 __global__ void
 sv_curv_col_ac_iso_rhs_src_gpu(
-             float *__restrict__ hVx , float *__restrict__ hVz ,
-             float *__restrict__ hP, 
-             float *__restrict__ jac3d, float *__restrict__ slw3d,
+             float * hVx , float * hVz ,
+             float * hP, 
+             float * jac3d, float * slw3d,
              src_t src_d, // short nation for reference member
              const int verbose);
 

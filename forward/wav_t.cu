@@ -151,7 +151,7 @@ wav_ac_init(gd_t *gd,
 }
 
 int
-wav_check_value(float *__restrict__ w, wav_t *wav)
+wav_check_value(float * w, wav_t *wav)
 {
   int ierr = 0;
 

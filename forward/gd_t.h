@@ -103,7 +103,7 @@ gd_curv_metric_init(gd_t        *gd,
 void
 gd_curv_metric_cal(gd_t        *gdcurv,
                    gdcurv_metric_t *metric,
-                   int fd_len, int *__restrict__ fd_indx, float *__restrict__ fd_coef);
+                   int fd_len, int * fd_indx, float * fd_coef);
 
 void
 gd_curv_gen_cart(gd_t *gdcurv,
@@ -135,8 +135,8 @@ gd_curv_gen_layer(char *in_grid_layer_file,
                       int *grid_layer_start,
                       int n_total_grid_x,
                       int n_total_grid_z,
-                      float *__restrict__ x2d,
-                      float *__restrict__ z2d,
+                      float * x2d,
+                      float * z2d,
                       int nx, int ni, int gni1, int fdx_nghosts, 
                       int nz, int nk, int gnk1, int fdz_nghosts);
 

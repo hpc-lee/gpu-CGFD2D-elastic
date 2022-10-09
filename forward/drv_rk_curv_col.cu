@@ -75,14 +75,14 @@ drv_rk_curv_col_allstep(
   init_wave_device(wav, &wav_d);
   //---------------------------------------
   // get device wavefield 
-  float *__restrict__ w_buff = wav->v4d; // size number is V->siz_icmp * (V->ncmp+6)
+  float * w_buff = wav->v4d; // size number is V->siz_icmp * (V->ncmp+6)
 
   // local pointer
-  float *__restrict__ w_cur_d;
-  float *__restrict__ w_pre_d;
-  float *__restrict__ w_rhs_d;
-  float *__restrict__ w_end_d;
-  float *__restrict__ w_tmp_d;
+  float * w_cur_d;
+  float * w_pre_d;
+  float * w_rhs_d;
+  float * w_end_d;
+  float * w_tmp_d;
 
   // get wavefield
   w_pre_d = wav_d.v4d + wav_d.siz_ilevel * 0; // previous level at n
@@ -441,10 +441,10 @@ drv_rk_curv_col_allstep(
 
     // snapshot
     if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
-      io_snap_nc_put_ac(iosnap, &iosnap_nc, gd, wav, 
+      io_snap_nc_put_ac(iosnap, &iosnap_nc, gd, md, wav, 
                      w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
     } else {
-      io_snap_nc_put(iosnap, &iosnap_nc, gd, wav, 
+      io_snap_nc_put(iosnap, &iosnap_nc, gd, md, wav, 
                      w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
     }
 
@@ -455,7 +455,7 @@ drv_rk_curv_col_allstep(
     {
       for (int idim=0; idim<CONST_NDIM; idim++) {
         for (int iside=0; iside<2; iside++) {
-          bdrypml_auxvar_t *auxvar = &(bdry_d.auxvar[idim][iside]);
+          bdrypml_auxvar_t *auxvar_d = &(bdry_d.auxvar[idim][iside]);
           auxvar_d->cur = auxvar_d->pre;
           auxvar_d->pre = auxvar_d->end;
           auxvar_d->end = auxvar_d->cur;

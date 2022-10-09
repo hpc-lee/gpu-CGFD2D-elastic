@@ -3,7 +3,7 @@
 
 #include "constants.h"
 #include "gd_t.h"
-#include "io_funcs.h"
+#include "md_t.h"
 #include "wav_t.h"
 
 /*************************************************
@@ -21,7 +21,7 @@ typedef struct
   float dk;
   int   i;
   int   k;
-  int   indx1d[CONST_NDIM_2];
+  size_t   indx1d[CONST_NDIM_2];
   float *seismo;
   char  name[CONST_MAX_STRLEN];
 } iorecv_one_t;
@@ -138,9 +138,10 @@ int
 io_snap_nc_put(iosnap_t *iosnap,
                iosnap_nc_t *iosnap_nc,
                gd_t    *gd,
+               md_t    *md,
                wav_t   *wav,
-               float *__restrict__ w4d,
-               float *__restrict__ buff,
+               float * w_end_d,
+               float * buff,
                int   nt_total,
                int   it,
                float time,
@@ -155,9 +156,10 @@ int
 io_snap_nc_put_ac(iosnap_t *iosnap,
                iosnap_nc_t *iosnap_nc,
                gd_t    *gd,
+               md_t    *md,
                wav_t   *wav,
-               float *__restrict__ w4d,
-               float *__restrict__ buff,
+               float * w_end_d,
+               float * buff,
                int   nt_total,
                int   it,
                float time,
@@ -165,8 +167,8 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
                int is_run_out_stress,  // 
                int is_incr_cur_it);     // for stg, should output cur_it once
 
-int
-io_snap_pack_buff(float *__restrict__ var,
+__global__ void
+io_snap_pack_buff(float * var,
                   size_t siz_iz,
                   int starti,
                   int counti,
@@ -174,18 +176,40 @@ io_snap_pack_buff(float *__restrict__ var,
                   int startk,
                   int countk,
                   int increk,
-                  float *__restrict__ buff);
+                  float * buff_d);
 
+int
+io_snap_stress_to_strain_eliso(float *lam3d,
+                               float *mu3d,
+                               float *Txx,
+                               float *Tzz,
+                               float *Txz,
+                               float *Exx,
+                               float *Ezz,
+                               float *Exz,
+                               size_t siz_iz,
+                               int starti,
+                               int counti,
+                               int increi,
+                               int startk,
+                               int countk,
+                               int increk);
 int
 io_snap_nc_close(iosnap_nc_t *iosnap_nc);
 
 int
-io_recv_keep(iorecv_t *iorecv, float *__restrict__ w4d,
-             int it, int ncmp, int siz_icmp);
+io_recv_keep(iorecv_t *iorecv, float * w_end_d,
+             float * buff, int it, int ncmp, int siz_icmp);
 
 int
-io_line_keep(ioline_t *ioline, float *__restrict__ w4d,
-             int it, int ncmp, int siz_icmp);
+io_line_keep(ioline_t *ioline, float * w_end_d,
+             float * buff, int it, int ncmp, int siz_icmp);
+
+__global__ void
+io_recv_line_interp_pack_buff(float *var, float *buff_d, int ncmp, size_t siz_icmp, size_t *indx1d_d);
+
+__global__ void
+io_recv_line_pack_buff(float *var, float *buff_d, int ncmp, size_t siz_icmp, int iptr);
 
 int
 io_recv_output_sac(iorecv_t *iorecv,
@@ -202,8 +226,8 @@ io_line_output_sac(ioline_t *ioline,
 
 int
 io_recv_output_sac_el_iso_strain(iorecv_t *iorecv,
-                     float *__restrict__ lam3d,
-                     float *__restrict__ mu3d,
+                     float * lam3d,
+                     float * mu3d,
                      float dt,
                      char *evtnm,
                      char *output_dir,

@@ -225,7 +225,7 @@ int dealloc_gdcurv_device(gd_t gdcurv_d)
 
 int dealloc_md_device(md_t md_d)
 {
-  if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO)
+  if (md_d.medium_type == CONST_MEDIUM_ACOUSTIC_ISO)
   {
     CUDACHECK(cudaFree(md_d.rho   )); 
     CUDACHECK(cudaFree(md_d.kappa)); 
@@ -291,17 +291,13 @@ int dealloc_src_device(src_t src_d)
   if(src_d.force_actived == 1)
   {
     CUDACHECK(cudaFree(src_d.Fx)); 
-    CUDACHECK(cudaFree(src_d.Fy)); 
     CUDACHECK(cudaFree(src_d.Fz)); 
   }
   if(src_d.moment_actived == 1)
   {
     CUDACHECK(cudaFree(src_d.Mxx)); 
-    CUDACHECK(cudaFree(src_d.Myy)); 
     CUDACHECK(cudaFree(src_d.Mzz)); 
     CUDACHECK(cudaFree(src_d.Mxz)); 
-    CUDACHECK(cudaFree(src_d.Myz)); 
-    CUDACHECK(cudaFree(src_d.Mxy)); 
   }
   if(src_d.total_number > 0)
   {
