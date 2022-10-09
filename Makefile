@@ -43,7 +43,7 @@ LDFLAGS += -lm -arch=sm_80
 
 main_curv_col_2d: \
 		cJSON.o sacLib.o fdlib_mem.o fdlib_math.o  \
-		fd_t.o par_t.o \
+		fd_t.o par_t.o interp.o alloc.o \
 		media_utility.o \
 		media_layer2model.o \
 		media_grid2model.o \
@@ -51,13 +51,13 @@ main_curv_col_2d: \
 		media_read_file.o \
 		gd_t.o md_t.o wav_t.o \
 		bdry_t.o src_t.o io_funcs.o \
-		blk_t.o interp.o\
+		blk_t.o cuda_common.o\
 		drv_rk_curv_col.o \
-		sv_curv_col_el.o \
-		sv_curv_col_ac_iso.o \
-		sv_curv_col_el_iso.o \
-		sv_curv_col_el_vti.o \
-		sv_curv_col_el_aniso.o \
+		sv_curv_col_el_gpu.o \
+		sv_curv_col_ac_iso_gpu.o \
+		sv_curv_col_el_iso_gpu.o \
+		sv_curv_col_el_vti_gpu.o \
+		sv_curv_col_el_aniso_gpu.o \
 		main_curv_col_2d.o
 	$(GC) -o $@ $^ $(LDFLAGS)
 
@@ -83,6 +83,10 @@ fd_t.o: forward/fd_t.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
 par_t.o: forward/par_t.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
+alloc.o: forward/alloc.cu
+	$(GC) -c -o $@ $(CFLAGS_CUDA) $<
+cuda_common.o: forward/cuda_common.cu
+	$(GC) -c -o $@ $(CFLAGS_CUDA) $<
 interp.o: forward/interp.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
 gd_t.o: forward/gd_t.cu
@@ -101,15 +105,15 @@ blk_t.o: forward/blk_t.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
 drv_rk_curv_col.o:          forward/drv_rk_curv_col.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
-sv_curv_col_el.o:          forward/sv_curv_col_el.cu
+sv_curv_col_el_gpu.o:          forward/sv_curv_col_el_gpu.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
-sv_curv_col_el_iso.o:   forward/sv_curv_col_el_iso.cu
+sv_curv_col_el_iso_gpu.o:   forward/sv_curv_col_el_iso_gpu.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
-sv_curv_col_el_vti.o:   forward/sv_curv_col_el_vti.cu
+sv_curv_col_el_vti_gpu.o:   forward/sv_curv_col_el_vti_gpu.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
-sv_curv_col_el_aniso.o: forward/sv_curv_col_el_aniso.cu
+sv_curv_col_el_aniso_gpu.o: forward/sv_curv_col_el_aniso_gpu.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
-sv_curv_col_ac_iso.o:   forward/sv_curv_col_ac_iso.cu
+sv_curv_col_ac_iso_gpu.o:   forward/sv_curv_col_ac_iso_gpu.cu
 	${GC} -c -o $@ $(CFLAGS_CUDA) $<
 
 main_curv_col_2d.o: forward/main_curv_col_2d.cu

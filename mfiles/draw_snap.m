@@ -4,13 +4,23 @@ clc;
 addmypath
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project1/test.json'
-output_dir='../project1/output'
+parfnm='../project/test.json'
+output_dir='../project/output'
 
 % which grid profile to plot
 subs=[1,1];     % start from index '1'
-subc=[300,300];   % '-1' to plot all points in this dimension
+subc=[-1,-1];   % '-1' to plot all points in this dimension
 subt=[1,1];
+
+% which snapshot to plot
+id=1;
+
+% variable and time to plot
+varnm='Exx';
+ns=600;
+ne=600;
+nt=50;
+
 % read parameters file
 par=loadjson(parfnm);
 snap_subs=par.snapshot{1}.grid_index_start;
@@ -38,14 +48,6 @@ else
   subc1(2) = subc(2);
 end
 
-% which snapshot to plot
-id=1;
-
-% variable and time to plot
-varnm='Vx';
-ns=50;
-ne=600;
-nt=50;
 
 % figure control parameters
 flag_km     = 1;
