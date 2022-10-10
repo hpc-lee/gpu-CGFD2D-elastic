@@ -1359,6 +1359,63 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   return is_here;
 }
 
+/*
+ * convert depth to axis
+ */
+int
+gd_curv_depth_to_axis(gd_t *gd,
+                      float sx,
+                      float *sz)
+{
+  int ierr = 0;
+  int nk2 = gd->nk2;
+  int ni1 = gd->ni1;
+  int ni2 = gd->ni2;
+  size_t siz_iz = gd->siz_iz;
+  size_t iptr;
+  size_t iptr_pt;
+  float points_x[2];
+  float points_z[2];
+  float xmin, xmax;
+
+  // not here if outside coord range
+  if ( sx < gd->xmin || sx > gd->xmax )
+  {
+    return ierr;
+  }
+
+
+  for(int i=ni1; i<ni2; i++)
+  {
+    iptr = i + nk2 * siz_iz;
+    xmin = gd->x2d[iptr];
+    xmax = gd->x2d[iptr+1];
+    if(sx>=xmin  && sx <xmax )
+    {
+      for (int n1=0; n1<2; n1++) 
+      {
+        iptr_pt = (i+n1) + nk2 * siz_iz;
+        points_x[n1] = gd->x2d[iptr_pt];
+        points_z[n1] = gd->z2d[iptr_pt];
+      }
+    }
+  }
+
+  float ztopo = linear_interp_1d(sx,points_x,points_z);
+  *sz = ztopo - (*sz);
+
+  return ierr;
+}
+
+float
+linear_interp_1d(float ix, float *x, float *z)
+{
+  float iz;
+  iz = (ix-x[1])/(x[0]-x[1])*z[0] + (ix-x[0])/(x[1]-x[0]) * z[1];
+
+  return iz;
+}
+
 /* 
  * find curv index using sampling
  */

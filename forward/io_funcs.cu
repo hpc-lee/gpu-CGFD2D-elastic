@@ -75,7 +75,7 @@ io_recv_read_locate(gd_t *gd,
       rz = rz + gd->fdz_nghosts;
       // if sz is relative to surface, convert to normal index
       if (is_depth == 1) {
-        rz = gd->nk2 - rz;
+        rz = gd->nk2 - rz + gd->fdz_nghosts;
       }
 
       // do not take nearest value, but use smaller value
@@ -92,7 +92,7 @@ io_recv_read_locate(gd_t *gd,
       {
         // if rz is depth, convert to axis when it is in this thread
         if (is_depth == 1) {
-          //gd_curv_depth_to_axis(gd,rx,&rz);
+          gd_curv_depth_to_axis(gd,rx,&rz);
         }
         gd_curv_coord_to_local_indx(gd,rx,rz,
                                &ix,&iz,&rx_inc,&rz_inc);

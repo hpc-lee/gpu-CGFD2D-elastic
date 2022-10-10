@@ -178,6 +178,14 @@ gd_curv_coord_to_local_indx(gd_t *gd,
                             float *sx_inc, float *sz_inc);
 
 int
+gd_curv_depth_to_axis(gd_t *gd,
+                      float sx,
+                      float *sz);
+
+float
+linear_interp_1d(float ix, float *x, float *z);
+
+int
 gd_curv_coord2index_sample(float sx, float sz, 
     float *points_x, // x coord of all points
     float *points_z,

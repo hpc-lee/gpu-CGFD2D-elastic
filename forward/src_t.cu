@@ -203,7 +203,7 @@ src_read_locate_file(gd_t     *gd,
         {
           // if sz is depth, convert to axis when it is in this thread
           if (is_depth == 1) {
-            //gd_curv_depth_to_axis(gd,sx,&sz);
+            gd_curv_depth_to_axis(gd,sx,&sz);
           }
           gd_curv_coord_to_local_indx(gd,sx,sz,
                                       &si,&sk,&sx_inc,&sz_inc);
@@ -237,7 +237,7 @@ src_read_locate_file(gd_t     *gd,
         sz = sz + gd->fdz_nghosts;
         // if sz is relative to surface, convert to normal index
         if (is_depth == 1) {
-          sz = gd->nk2 - sz;
+          sz = gd->nk2 - sz + gd->fdz_nghosts;
         }
 
         // nearest integer index
