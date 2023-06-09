@@ -13,11 +13,8 @@
 # compiler
 #-------------------------------------------------------------------------------
 
-CUDAHOME   := /data3/lihl/software/cuda-11.5
-NETCDF := /data3/lihl/software/disable-netcdf-4.4.1
-
-CXX    := /data3/lihl/software/gcc-10.3.0-compile/bin/g++
-GC     :=  $(CUDAHOME)/bin/nvcc 
+CXX    := $(GNUHOME)/bin/g++
+GC     := $(CUDAHOME)/bin/nvcc 
 
 #- debug
 #CFLAGS   := -g -std=c99 $(CFLAGS)
