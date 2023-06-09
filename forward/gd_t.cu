@@ -23,7 +23,7 @@ void
 gd_curv_init(gd_t *gdcurv)
 {
   /*
-   * 0-2: x3d, y3d, z3d
+   * 0-2: x2d, z2d
    */
 
   gdcurv->type = GD_TYPE_CURV;
@@ -273,8 +273,8 @@ gd_curv_gen_cart(gd_t *gdcurv,
                  float dx, float x0_glob,
                  float dz, float z0_glob)
 {
-  float *x3d = gdcurv->x2d;
-  float *z3d = gdcurv->z2d;
+  float *x2d = gdcurv->x2d;
+  float *z2d = gdcurv->z2d;
 
   float x0 = x0_glob + (0 - gdcurv->fdx_nghosts) * dx;
   float z0 = z0_glob + (0 - gdcurv->fdz_nghosts) * dz;
@@ -284,8 +284,8 @@ gd_curv_gen_cart(gd_t *gdcurv,
   {
       for (size_t i=0; i<gdcurv->nx; i++)
       {
-        x3d[iptr] = x0 + i * dx;
-        z3d[iptr] = z0 + k * dz;
+        x2d[iptr] = x0 + i * dx;
+        z2d[iptr] = z0 + k * dz;
 
         iptr++;
       }
@@ -304,7 +304,7 @@ gd_cart_init_set(gd_t *gdcart,
                  float dz, float z0_glob)
 {
   /*
-   * 0-2: x3d, y3d, z3d
+   * 0-2: x2d, z2d
    */
 
   gdcart->type = GD_TYPE_CART;
@@ -967,7 +967,7 @@ gd_curv_gen_layer(char *in_grid_layer_file,
 }
 
 //  Interpolating the Z coordinate
-int gd_grid_z_interp(float *z3dpart, float *zlayerpart, int *NCellPerlay,
+int gd_grid_z_interp(float *z2dpart, float *zlayerpart, int *NCellPerlay,
                      int *VmapSpacingIsequal, int nLayers)
 {
   int ierr = 0;
@@ -1003,10 +1003,10 @@ int gd_grid_z_interp(float *z3dpart, float *zlayerpart, int *NCellPerlay,
   for (int i = 0; i < nLayers; i++)
   {
     // The grid spacing is equal
-    z3dpart[sumNCellPerlay] = zlayerpart[i];
+    z2dpart[sumNCellPerlay] = zlayerpart[i];
     for (int ii = sumNCellPerlay; ii < sumNCellPerlay + NCellPerlay[i] - 1; ii++)
     {
-      z3dpart[ii+1] = zlayerpart[i] + (ii - sumNCellPerlay + 1) * LayerDz[i];
+      z2dpart[ii+1] = zlayerpart[i] + (ii - sumNCellPerlay + 1) * LayerDz[i];
     }
     // The grid spacing is not equal
     if (VmapSpacingIsequal[i] < 1 && i > 0 && i < nLayers - 1)
@@ -1035,13 +1035,13 @@ int gd_grid_z_interp(float *z3dpart, float *zlayerpart, int *NCellPerlay,
         }
         for (int ii = sumNCellPerlay; ii < sumNCellPerlay + NCellPerlay[i]; ii++)
         {
-          z3dpart[ii] = range1[ii - sumNCellPerlay];
+          z2dpart[ii] = range1[ii - sumNCellPerlay];
         }
       }
     }
     sumNCellPerlay += NCellPerlay[i];
   }
-  z3dpart[sumNCellPerlay] = zlayerpart[nLayers];
+  z2dpart[sumNCellPerlay] = zlayerpart[nLayers];
 
   return ierr;
 }
@@ -1255,8 +1255,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   int nk2 = gd->nk2;
   size_t siz_iz = gd->siz_iz;
 
-  float * x3d = gd->x2d;
-  float * z3d = gd->z2d;
+  float * x2d = gd->x2d;
+  float * z2d = gd->z2d;
 
   // outside coord range
   if ( sx < gd->xmin || sx > gd->xmax ||
@@ -1267,8 +1267,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
   }
 
   // init closest point
-  float min_dist = sqrtf(  (sx - x3d[0]) * (sx - x3d[0])
-      + (sz - z3d[0]) * (sz - z3d[0]) );
+  float min_dist = sqrtf(  (sx - x2d[0]) * (sx - x2d[0])
+      + (sz - z2d[0]) * (sz - z2d[0]) );
   int min_dist_i = 0 ;
   int min_dist_k = 0 ;
 
@@ -1278,8 +1278,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
       {
         size_t iptr = i + k * siz_iz;
 
-        float x = x3d[iptr];
-        float z = z3d[iptr];
+        float x = x2d[iptr];
+        float z = z2d[iptr];
 
         float DistInt = sqrtf(  (sx - x) * (sx - x)
             + (sz - z) * (sz - z) );
@@ -1321,8 +1321,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
             for (int n1=0; n1<2; n1++) {
               int iptr_cube = n1 + n3 * 2;
               int iptr = (cur_i+n1)  + (cur_k+n3) * siz_iz;
-              points_x[iptr_cube] = x3d[iptr];
-              points_z[iptr_cube] = z3d[iptr];
+              points_x[iptr_cube] = x2d[iptr];
+              points_z[iptr_cube] = z2d[iptr];
               points_i[iptr_cube] = cur_i+n1;
               points_k[iptr_cube] = cur_k+n3;
             }
@@ -1416,11 +1416,12 @@ linear_interp_1d(float ix, float *x, float *z)
   return iz;
 }
 
+
 /* 
  * find curv index using sampling
  */
 
-  int
+int
 gd_curv_coord2index_sample(float sx, float sz, 
     float *points_x, // x coord of all points
     float *points_z,

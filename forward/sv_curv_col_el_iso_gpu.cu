@@ -175,7 +175,7 @@ sv_curv_col_el_iso_onestage(
                      Txx,Tzz,Txz,hVx,hVz,
                      xi_x, xi_z, zt_x, zt_z,
                      jac3d, slw3d,
-                     ni1,ni,nk1,nk,siz_iz,
+                     ni1,ni,nk1,nk2,siz_iz,
                      fdx_len, lfdx_indx_d, lfdx_coef_d,
                      fdz_len, lfdz_indx_d, lfdz_coef_d,
                      verbose);
@@ -192,7 +192,7 @@ sv_curv_col_el_iso_onestage(
                      xi_x, xi_z, zt_x, zt_z,
                      lam3d, mu3d, slw3d,
                      vecVx2Vz,
-                     ni1,ni,nk1,nk,siz_iz,
+                     ni1,ni,nk1,nk2,siz_iz,
                      fdx_len, lfdx_shift_d, lfdx_coef_d,
                      num_of_fdz_op,fdz_max_len,lfdz_len_d,
                      lfdz_coef_all_d,lfdz_shift_all_d,
@@ -328,9 +328,8 @@ sv_curv_col_el_iso_rhs_inner_gpu(
                 +lam    * ( xix*DxVx  + ztx*DzVx);
 
     hTxz[iptr] = mu *(
-                 xiz*DxVx + xix*DxVz
-                +ztz*DzVx + ztx*DzVz
-                );
+                      xiz*DxVx + xix*DxVz
+                     +ztz*DzVx + ztx*DzVz);
   }
 
   return;
@@ -402,10 +401,10 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
       lam2mu = lam + 2.0 * mu;
 
       // Vx derivatives
-      M_FD_SHIFT(DxVx, Vx, iptr, fdx_len, lfdx_shift, lfdx_coef,n_fd);
+      M_FD_SHIFT(DxVx, Vx, iptr, fdx_len, lfdx_shift, lfdx_coef, n_fd);
 
       // Vz derivatives
-      M_FD_SHIFT(DxVz, Vz, iptr, fdx_len, lfdx_shift, lfdx_coef,n_fd);
+      M_FD_SHIFT(DxVz, Vz, iptr, fdx_len, lfdx_shift, lfdx_coef, n_fd);
 
       if (k==nk2) // at surface, convert
       {
@@ -418,8 +417,8 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
       }
       else // lower than surface, lower order
       {
-        M_FD_SHIFT(DzVx, Vx, iptr, lfdz_len, lfdz_shift, lfdz_coef,n_fd);
-        M_FD_SHIFT(DzVz, Vz, iptr, lfdz_len, lfdz_shift, lfdz_coef,n_fd);
+        M_FD_SHIFT(DzVx, Vx, iptr, lfdz_len, lfdz_shift, lfdz_coef, n_fd);
+        M_FD_SHIFT(DzVz, Vz, iptr, lfdz_len, lfdz_shift, lfdz_coef, n_fd);
       }
 
       // Hooke's equatoin
@@ -429,10 +428,10 @@ sv_curv_col_el_iso_rhs_vlow_z2_gpu(
       hTzz[iptr] = lam2mu * ( xiz*DxVz  + ztz*DzVz)
                   +lam    * ( xix*DxVx  + ztx*DzVx);
 
-      hTxz[iptr] = mu *(
-                   xiz*DxVx + xix*DxVz
-                  +ztz*DzVx + ztx*DzVz
-                  );
+      hTxz[iptr] = mu * (
+                         xiz*DxVx + xix*DxVz
+                        +ztz*DzVx + ztx*DzVz);
+
     }
   }
 
@@ -634,7 +633,7 @@ sv_curv_col_el_iso_rhs_cfspml_gpu(int idim, int iside,
       // add contributions from free surface condition
       //  not consider timg because conflict with main cfspml,
       //     need to revise in the future if required
-      if (bdry_d.is_sides_free[CONST_NDIM-1][1]==1 && (iz+abs_nk1)==nk2)
+      if (bdry_d.is_sides_free[CONST_NDIM-1][1]==1 && (iz+abs_nk1) == nk2)
       {
         // zeta derivatives
         int ij = (ix+abs_ni1)*4;
@@ -745,6 +744,8 @@ sv_curv_col_el_iso_dvh2dvz_gpu(gd_t        gd_d,
                                bdry_t     bdry_d,
                                const int verbose)
 {
+  size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+
   int ni1 = gd_d.ni1;
   int ni2 = gd_d.ni2;
   int nk1 = gd_d.nk1;
@@ -767,10 +768,9 @@ sv_curv_col_el_iso_dvh2dvz_gpu(gd_t        gd_d,
   float A[2][2], B[2][2];
   float AB[2][2];
 
-  size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
   if(ix<(ni2-ni1+1))
   {
-    size_t iptr = ix + nk2 * siz_iz;
+    size_t iptr = (ix+ni1) + nk2 * siz_iz;
     float e11 = xi_x[iptr];
     float e12 = xi_z[iptr];
     float e21 = zt_x[iptr];

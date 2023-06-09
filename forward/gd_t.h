@@ -45,7 +45,7 @@ typedef struct {
   int ncmp;
   float *v3d; // allocated var
 
-  //to avoid ref x3d at different funcs
+  //to avoid ref x2d at different funcs
   float *x2d; // pointer to var
   float *z2d;
 

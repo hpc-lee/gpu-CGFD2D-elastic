@@ -25,7 +25,7 @@ typedef struct
   // fd
   fd_t    *fd;     // collocated grid fd
   
-  // coordnate: x3d, y3d, z3d
+  // coordnate: x2d, z2d
   gd_t *gd;
 
   // grid metrics: jac, xi_x, etc

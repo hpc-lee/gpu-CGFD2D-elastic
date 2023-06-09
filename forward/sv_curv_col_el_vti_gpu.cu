@@ -180,7 +180,7 @@ sv_curv_col_el_vti_onestage(
                      Txx,Tzz,Txz,hVx,hVz,
                      xi_x, xi_z, zt_x, zt_z,
                      jac3d, slw3d,
-                     ni1,ni,nk1,nk,siz_iz,
+                     ni1,ni,nk1,nk2,siz_iz,
                      fdx_len, lfdx_indx_d, lfdx_coef_d,
                      fdz_len, lfdz_indx_d, lfdz_coef_d,
                      verbose);
@@ -661,7 +661,7 @@ sv_curv_col_el_vti_rhs_cfspml_gpu(int idim, int iside,
       // add contributions from free surface condition
       //  not consider timg because conflict with main cfspml,
       //     need to revise in the future if required
-      if (bdry_d.is_sides_pml[CONST_NDIM-1][1]==1 && (iz+abs_nk1)==nk2)
+      if (bdry_d.is_sides_free[CONST_NDIM-1][1]==1 && (iz+abs_nk1)==nk2)
       {
         // zeta derivatives
         int ij = (ix+abs_ni1)*4;
@@ -798,7 +798,7 @@ sv_curv_col_el_vti_dvh2dvz_gpu(gd_t       gd_d,
   size_t ix = blockIdx.x * blockDim.x + threadIdx.x;
   if(ix<(ni2-ni1+1))
   {
-    size_t iptr = ix + nk2 * siz_iz;
+    size_t iptr = (ix+ni1) + nk2 * siz_iz;
 
     xix = xi_x[iptr];
     xiz = xi_z[iptr];

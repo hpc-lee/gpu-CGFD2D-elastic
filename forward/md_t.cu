@@ -399,7 +399,6 @@ md_gen_test_el_aniso(md_t *md)
 
         md->rho[iptr] = rho;
 
-	      //md->c11[iptr] = 25.2*1e9;//lam + 2.0f*mu;
 	      md->c11[iptr] = 25.2*1e9;//lam + 2.0f*mu;
 	      md->c13[iptr] = 10.9620*1e9;//lam;
 	      md->c15[iptr] = 0.0;
