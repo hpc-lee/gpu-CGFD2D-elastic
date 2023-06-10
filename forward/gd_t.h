@@ -133,33 +133,6 @@ gd_curv_metric_export(gd_t        *gd,
                       gdcurv_metric_t *metric,
                       char *output_dir);
 
-int
-gd_curv_gen_layer(char *in_grid_layer_file,
-                      int *grid_layer_resample_factor,
-                      int *grid_layer_start,
-                      int n_total_grid_x,
-                      int n_total_grid_z,
-                      float * x2d,
-                      float * z2d,
-                      int nx, int ni, int gni1, int fdx_nghosts, 
-                      int nz, int nk, int gnk1, int fdz_nghosts);
-
-int gd_grid_z_interp(float *z2dpart, float *zlayerpart, int *NCellPerlay,
-                     int *VmapSpacingIsequal, int nLayers);
-
-float gd_seval(int ni, float u,
-            int n, float x[], float y[],
-            float b[], float c[], float d[],
-            int *last);
-
-int gd_SPLine( int n, int end1, int end2,
-           float slope1, float slope2,
-           float x[], float y[],
-           float b[], float c[], float d[],
-           int *iflag);
-
-void gd_SPL(int n, float *x, float *y, int ni, float *xi, float *yi);
-
 void
 gd_curv_set_minmax(gd_t *gdcurv);
 

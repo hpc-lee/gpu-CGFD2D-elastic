@@ -27,16 +27,24 @@ mkdir -p $GRID_DIR
 mkdir -p $MEDIA_DIR
 
 #----------------------------------------------------------------------
+#-- grid and mpi configurations
+#----------------------------------------------------------------------
+
+#-- total x grid points
+NX=197
+#-- total z grid points
+NZ=201
+#----------------------------------------------------------------------
 #-- create main conf
 #----------------------------------------------------------------------
 cat << ieof > $PAR_FILE
 {
-  "number_of_total_grid_points_x" : 300,
-  "number_of_total_grid_points_z" : 300,
+  "number_of_total_grid_points_x" : ${NX},
+  "number_of_total_grid_points_z" : ${NZ},
 
-  "size_of_time_step" : 0.01,
-  "number_of_time_steps" : 600,
-  "#time_window_length" : 4,
+  "size_of_time_step" : 0.001,
+  "number_of_time_steps" : 10000,
+  "#time_window_length" : 2,
   "check_stability" : 1,
 
   "boundary_x_left" : {
@@ -66,12 +74,6 @@ cat << ieof > $PAR_FILE
       "cartesian" : {
         "origin"  : [0.0, -29900.0 ],
         "inteval" : [ 100.0, 100.0 ]
-      },
-      "#layer_interp" : {
-        "in_grid_layer_file" : "$INPUTDIR/prep_grid/random_topo.gdlay",
-        "refine_factor" : [ 1, 1 ],
-        "horizontal_start_index" : [ 3],
-        "vertical_last_to_top" : 0
       }
   },
   "is_export_grid" : 1,
@@ -142,7 +144,7 @@ cat << ieof > $PAR_FILE
     {
       "name" : "volume_vel",
       "grid_index_start" : [ 0,   0 ],
-      "grid_index_count" : [ 300, 300 ],
+      "grid_index_count" : [ ${NX}, ${NZ} ],
       "grid_index_incre" : [  1,  1 ],
       "time_index_start" : 0,
       "time_index_incre" : 1,
@@ -168,7 +170,6 @@ cat << ieof > ${PROJDIR}/cgfd_sim.sh
 #!/bin/bash
 
 set -e
-printf "\nUse $NUMPROCS CPUs on following nodes:\n"
 
 printf "\nStart simualtion ...\n";
 time $EXEC_WAVE $PAR_FILE 100 2>&1 |tee log
@@ -192,4 +193,4 @@ fi
 
 date
 
-# vim:ft=conf:ts=4:sw=4:nu:et:ai:
+# vim:ts=4:sw=4:nu:et:ai:
