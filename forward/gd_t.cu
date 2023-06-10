@@ -489,7 +489,6 @@ gd_curv_coord_export(gd_t *gdcurv,
   return;
 }
 
-/*
 void
 gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
 {
@@ -501,100 +500,23 @@ gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
   int ncid;
   int varid;
 
-  int ierr = nc_open(in_file, NC_NOWRITE, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"open coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  int ierr = nc_open(in_file, NC_NOWRITE, &ncid);  handle_nc_err(ierr);
 
   // read vars
   for (int ivar=0; ivar<gdcurv->ncmp; ivar++)
   {
     float *ptr = gdcurv->v3d + gdcurv->cmp_pos[ivar];
 
-    ierr = nc_inq_varid(ncid, gdcurv->cmp_name[ivar], &varid);
-    if (ierr != NC_NOERR){
-      fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-      exit(-1);
-    }
+    ierr = nc_inq_varid(ncid, gdcurv->cmp_name[ivar], &varid);  handle_nc_err(ierr);
 
-    ierr = nc_get_var(ncid, varid, ptr);
-    if (ierr != NC_NOERR){
-      fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-      exit(-1);
-    }
+    ierr = nc_get_var(ncid, varid, ptr);  handle_nc_err(ierr);
   }
   
   // close file
-  ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  ierr = nc_close(ncid);  handle_nc_err(ierr);
 
   return;
 }
-*/
-
-void
-gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
-{
-  // construct file name
-  char in_file[CONST_MAX_STRLEN];
-  sprintf(in_file, "%s/coord.nc", import_dir);
-
-  int ni = gdcurv->ni;
-  int nk = gdcurv->nk;
-  int nx = gdcurv->nx;
-  int nz = gdcurv->nz;
-  int ni1 = gdcurv->ni1;
-  int nk1 = gdcurv->nk1;
-  int ni2 = gdcurv->ni2;
-  int nk2 = gdcurv->nk2;
-  size_t siz_iz = gdcurv->siz_iz;
-  float *x2d = gdcurv->x2d;
-  float *z2d = gdcurv->z2d;
-
-
-  float *coord_x = (float *) malloc(sizeof(float)*ni*nk);  
-  float *coord_z = (float *) malloc(sizeof(float)*ni*nk);  
-  size_t start[] = {0, 0};
-  size_t count[] = {nk, ni};
-  
-  // read in nc
-  int ncid;
-  int xid,zid;
-  int ierr, iptr, iptr1;
- 
-  ierr = nc_open(in_file, NC_NOWRITE, &ncid);  handle_nc_err(ierr);
-
-  // read vars
-  ierr = nc_inq_varid(ncid, "x", &xid);  handle_nc_err(ierr);
-  ierr = nc_inq_varid(ncid, "z", &zid);  handle_nc_err(ierr);
-
-  ierr = nc_get_vara_float(ncid, xid, start, count, coord_x); handle_nc_err(ierr);
-  ierr = nc_get_vara_float(ncid, zid, start, count, coord_z); handle_nc_err(ierr);
-  
-  // close file
-  ierr = nc_close(ncid); handle_nc_err(ierr);
-
-  for (int k = nk1; k <= nk2; k++){
-    for (int i = ni1; i<= ni2; i++){
-      iptr = i + siz_iz * k;
-      iptr1 = (i-3) + ni * (k-3);
-      x2d[iptr] = coord_x[iptr1]; 
-      z2d[iptr] = coord_z[iptr1];
-    }
-  }
-
-  geometric_symmetry(gdcurv,gdcurv->v3d,gdcurv->ncmp);
-
-  free(coord_x);
-  free(coord_z);
-
-  return;
-}
-
 
 void
 gd_cart_coord_export(gd_t *gdcart,
