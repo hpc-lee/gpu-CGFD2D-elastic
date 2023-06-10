@@ -188,31 +188,18 @@ md_import(md_t *md, char *in_dir)
   
   // read in nc
   ierr = nc_open(in_file, NC_NOWRITE, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
   
   for (int icmp=0; icmp < md->ncmp; icmp++) {
       ierr = nc_inq_varid(ncid, md->cmp_name[icmp], &varid);
-      if (ierr != NC_NOERR){
-        fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-        exit(-1);
-      }
+      handle_nc_err(ierr);
   
       ierr = nc_get_var_float(ncid,varid,md->v3d + md->cmp_pos[icmp]);
-      if (ierr != NC_NOERR){
-        fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-        exit(-1);
-      }
+      handle_nc_err(ierr);
   }
   
   // close file
-  ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  ierr = nc_close(ncid);  handle_nc_err(ierr);
 
   return ierr;
 }
@@ -244,18 +231,18 @@ md_export(gd_t  *gd,
   int dimid[CONST_NDIM];
 
   ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"creat coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   // define dimension
   ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  handle_nc_err(ierr);
   ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  handle_nc_err(ierr);
 
   // define vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
     ierr = nc_def_var(ncid, m3d_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
+    handle_nc_err(ierr);
   }
 
   // attribute: index in output snapshot, index w ghost in thread
@@ -269,19 +256,18 @@ md_export(gd_t  *gd,
 
   // end def
   ierr = nc_enddef(ncid);
+  handle_nc_err(ierr);
 
   // add vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
     float *ptr = md->v3d + m3d_pos[ivar];
     ierr = nc_put_var_float(ncid, varid[ivar],ptr);
+    handle_nc_err(ierr);
   }
   
   // close file
   ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   return ierr;
 }

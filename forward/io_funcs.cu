@@ -432,26 +432,39 @@ io_snap_nc_create(iosnap_t *iosnap, iosnap_nc_t *iosnap_nc)
     int snap_out_T = iosnap->out_stress[n];
     int snap_out_E = iosnap->out_strain[n];
 
-    if (nc_create(snap_fname[n], NC_CLOBBER, &ncid[n])) M_NCERR;
-    if (nc_def_dim(ncid[n], "time", NC_UNLIMITED, &dimid[0])) M_NCERR;
-    if (nc_def_dim(ncid[n], "k", snap_nk     , &dimid[1])) M_NCERR;
-    if (nc_def_dim(ncid[n], "i", snap_ni     , &dimid[2])) M_NCERR;
+    ierr = nc_create(snap_fname[n], NC_CLOBBER, &ncid[n]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "time", NC_UNLIMITED, &dimid[0]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "k", snap_nk     , &dimid[1]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "i", snap_ni     , &dimid[2]);
+    handle_nc_err(ierr);
     // time var
-    if (nc_def_var(ncid[n], "time", NC_FLOAT, 1, dimid+0, &timeid[n])) M_NCERR;
+    ierr = nc_def_var(ncid[n], "time", NC_FLOAT, 1, dimid+0, &timeid[n]);
+    handle_nc_err(ierr);
     // other vars
     if (snap_out_V==1) {
-       if (nc_def_var(ncid[n],"Vx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+0])) M_NCERR;
-       if (nc_def_var(ncid[n],"Vz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+1])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Vx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+0]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Vz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+1]);
+       handle_nc_err(ierr);
     }
     if (snap_out_T==1) {
-       if (nc_def_var(ncid[n],"Txx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+0])) M_NCERR;
-       if (nc_def_var(ncid[n],"Tzz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+1])) M_NCERR;
-       if (nc_def_var(ncid[n],"Txz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+2])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Txx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+0]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Tzz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+1]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Txz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n*3+2]);
+       handle_nc_err(ierr);
     }
     if (snap_out_E==1) {
-       if (nc_def_var(ncid[n],"Exx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +0])) M_NCERR;
-       if (nc_def_var(ncid[n],"Ezz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +1])) M_NCERR;
-       if (nc_def_var(ncid[n],"Exz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +2])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Exx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +0]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Ezz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +1]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Exz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n*3 +2]);
+       handle_nc_err(ierr);
     }
     // attribute: index in output snapshot, index w ghost in thread
     int g_start[] = { iosnap->i1_to_glob[n],
@@ -467,7 +480,8 @@ io_snap_nc_create(iosnap_t *iosnap, iosnap_nc_t *iosnap_nc)
     nc_put_att_int(ncid[n],NC_GLOBAL,"index_stride_in_this_thread",
                    NC_INT,CONST_NDIM,l_count);
 
-    if (nc_enddef(ncid[n])) M_NCERR;
+    ierr = nc_enddef(ncid[n]);
+    handle_nc_err(ierr);
   } // loop snap
 
   return ierr;
@@ -673,22 +687,31 @@ io_snap_nc_create_ac(iosnap_t *iosnap, iosnap_nc_t *iosnap_nc)
     int snap_out_T = iosnap->out_stress[n];
     int snap_out_E = iosnap->out_strain[n];
 
-    if (nc_create(snap_fname[n], NC_CLOBBER, &ncid[n])) M_NCERR;
-    if (nc_def_dim(ncid[n], "time", NC_UNLIMITED, &dimid[0])) M_NCERR;
-    if (nc_def_dim(ncid[n], "k", snap_nk     , &dimid[1])) M_NCERR;
-    if (nc_def_dim(ncid[n], "i", snap_ni     , &dimid[2])) M_NCERR;
+    ierr = nc_create(snap_fname[n], NC_CLOBBER, &ncid[n]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "time", NC_UNLIMITED, &dimid[0]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "k", snap_nk     , &dimid[1]);
+    handle_nc_err(ierr);
+    ierr = nc_def_dim(ncid[n], "i", snap_ni     , &dimid[2]);
+    handle_nc_err(ierr);
     // time var
-    if (nc_def_var(ncid[n], "time", NC_FLOAT, 1, dimid+0, &timeid[n])) M_NCERR;
+    ierr = nc_def_var(ncid[n], "time", NC_FLOAT, 1, dimid+0, &timeid[n]);
+    handle_nc_err(ierr);
     // other vars
     if (snap_out_V==1) {
-       if (nc_def_var(ncid[n],"Vx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+0])) M_NCERR;
-       if (nc_def_var(ncid[n],"Vz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+1])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Vx",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+0]);
+       handle_nc_err(ierr);
+       ierr = nc_def_var(ncid[n],"Vz",NC_FLOAT,CONST_NDIM+1,dimid,&varid_V[n*CONST_NDIM+1]);
+       handle_nc_err(ierr);
     }
     if (snap_out_T==1) {
-       if (nc_def_var(ncid[n],"Tii",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Tii",NC_FLOAT,CONST_NDIM+1,dimid,&varid_T[n]);
+       handle_nc_err(ierr);
     }
     if (snap_out_E==1) {
-       if (nc_def_var(ncid[n],"Eii",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n])) M_NCERR;
+       ierr = nc_def_var(ncid[n],"Eii",NC_FLOAT,CONST_NDIM+1,dimid,&varid_E[n]);
+       handle_nc_err(ierr);
     }
     // attribute: index in output snapshot, index w ghost in thread
     int g_start[] = { iosnap->i1_to_glob[n],
@@ -704,7 +727,8 @@ io_snap_nc_create_ac(iosnap_t *iosnap, iosnap_nc_t *iosnap_nc)
     nc_put_att_int(ncid[n],NC_GLOBAL,"index_stride_in_this_thread",
                    NC_INT,CONST_NDIM,l_count);
 
-    if (nc_enddef(ncid[n])) M_NCERR;
+    ierr = nc_enddef(ncid[n]);
+    handle_nc_err(ierr);
   } // loop snap
 
   return ierr;
