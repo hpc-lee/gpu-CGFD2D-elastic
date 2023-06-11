@@ -447,18 +447,18 @@ gd_curv_coord_export(gd_t *gdcurv,
   int dimid[CONST_NDIM];
 
   int ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"creat coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   // define dimension
   ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  handle_nc_err(ierr);
   ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  handle_nc_err(ierr);
 
   // define vars
   for (int ivar=0; ivar<gdcurv->ncmp; ivar++) {
     ierr = nc_def_var(ncid, gdcurv->cmp_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
+    handle_nc_err(ierr);
   }
 
   // attribute: index in output snapshot, index w ghost in thread
@@ -472,19 +472,18 @@ gd_curv_coord_export(gd_t *gdcurv,
 
   // end def
   ierr = nc_enddef(ncid);
+  handle_nc_err(ierr);
 
   // add vars
   for (int ivar=0; ivar<gdcurv->ncmp; ivar++) {
     float *ptr = gdcurv->v3d + gdcurv->cmp_pos[ivar];
     ierr = nc_put_var_float(ncid, varid[ivar],ptr);
+    handle_nc_err(ierr);
   }
   
   // close file
   ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   return;
 }
@@ -539,18 +538,19 @@ gd_cart_coord_export(gd_t *gdcart,
   int dimid[CONST_NDIM];
 
   int ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"creat coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   // define dimension
   ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  handle_nc_err(ierr);
   ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  handle_nc_err(ierr);
 
   // define vars
   ierr = nc_def_var(ncid, "x", NC_FLOAT, 1, dimid+1, &varid[0]);
+  handle_nc_err(ierr);
   ierr = nc_def_var(ncid, "z", NC_FLOAT, 1, dimid+0, &varid[1]);
+  handle_nc_err(ierr);
 
   // attribute: index in output snapshot, index w ghost in thread
   int l_start[] = { ni1, nk1 };
@@ -563,17 +563,17 @@ gd_cart_coord_export(gd_t *gdcart,
 
   // end def
   ierr = nc_enddef(ncid);
+  handle_nc_err(ierr);
 
   // add vars
   ierr = nc_put_var_float(ncid, varid[0], gdcart->x1d);
+  handle_nc_err(ierr);
   ierr = nc_put_var_float(ncid, varid[1], gdcart->z1d);
+  handle_nc_err(ierr);
   
   // close file
   ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   return;
 }
@@ -603,18 +603,18 @@ gd_curv_metric_export(gd_t        *gd,
   int dimid[CONST_NDIM];
 
   int ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"creat coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   // define dimension
   ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  handle_nc_err(ierr);
   ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  handle_nc_err(ierr);
 
   // define vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
     ierr = nc_def_var(ncid, g3d_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
+    handle_nc_err(ierr);
   }
 
   // attribute: index in output snapshot, index w ghost in thread
@@ -628,19 +628,18 @@ gd_curv_metric_export(gd_t        *gd,
 
   // end def
   ierr = nc_enddef(ncid);
+  handle_nc_err(ierr);
 
   // add vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
     float *ptr = metric->v3d + g3d_pos[ivar];
     ierr = nc_put_var_float(ncid, varid[ivar],ptr);
+    handle_nc_err(ierr);
   }
   
   // close file
   ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 }
 
 void
@@ -655,10 +654,7 @@ gd_curv_metric_import(gdcurv_metric_t *metric, char *import_dir)
   int varid;
 
   int ierr = nc_open(in_file, NC_NOWRITE, &ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"open coord nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   // read vars
   for (int ivar=0; ivar<metric->ncmp; ivar++)
@@ -666,24 +662,15 @@ gd_curv_metric_import(gdcurv_metric_t *metric, char *import_dir)
     float *ptr = metric->v3d + metric->cmp_pos[ivar];
 
     ierr = nc_inq_varid(ncid, metric->cmp_name[ivar], &varid);
-    if (ierr != NC_NOERR){
-      fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-      exit(-1);
-    }
+    handle_nc_err(ierr);
 
     ierr = nc_get_var(ncid, varid, ptr);
-    if (ierr != NC_NOERR){
-      fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-      exit(-1);
-    }
+    handle_nc_err(ierr);
   }
   
   // close file
   ierr = nc_close(ncid);
-  if (ierr != NC_NOERR){
-    fprintf(stderr,"nc error: %s\n", nc_strerror(ierr));
-    exit(-1);
-  }
+  handle_nc_err(ierr);
 
   return;
 }
