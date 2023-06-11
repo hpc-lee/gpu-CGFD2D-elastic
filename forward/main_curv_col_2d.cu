@@ -358,7 +358,7 @@ int main(int argc, char** argv)
 
     //-- auto set stept
     if (dt < 0.0) {
-       dt       = blk_keep_two_digi(dtmax);
+       dt       = blk_keep_three_digi(dtmax);
        nt_total = (int) (par->time_window_length / dt + 0.5);
 
        fprintf(stdout, "-> Set dt       = %f according to maximum allowed value\n", dt);

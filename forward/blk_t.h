@@ -91,6 +91,6 @@ blk_dt_esti_cart(gd_t *gdcart, md_t *md,
                  int *dtmaxi, int *dtmaxk);
 
 float
-blk_keep_two_digi(float dt);
+blk_keep_three_digi(float dt);
 
 #endif
