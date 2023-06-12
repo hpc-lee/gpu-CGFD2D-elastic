@@ -145,6 +145,11 @@ io_recv_read_locate(gd_t *gd,
       this_recv->indx1d[3] = ix+1 + (iz+1) * gd->siz_iz;
 
       nr_this += 1;
+    } else {
+      fprintf(stdout,"#########         ########\n");
+      fprintf(stdout,"######### Warning ########\n");
+      fprintf(stdout,"#########         ########\n");
+      fprintf(stdout,"recv number %d physical coordinates are outside calculation area !\n",ir);
     }
   }
 
