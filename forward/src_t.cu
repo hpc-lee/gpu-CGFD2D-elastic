@@ -317,6 +317,13 @@ src_read_locate_file(gd_t     *gd,
   // alloc src_t
   src_init(src,force_actived,moment_actived,num_of_src_here,max_nt,max_stage,max_ext);
 
+  fprintf(stdout,"number of source is %d\n",num_of_src_here);
+  if(num_of_src_here<1)
+  {
+    fprintf(stdout,"number of source at least 1\n");
+    exit(1);
+    fflush(stdout);
+  }
   //
   // loop all source and only keep those in this thread
   //
