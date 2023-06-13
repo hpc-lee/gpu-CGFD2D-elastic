@@ -818,7 +818,7 @@ gd_curv_coord_to_local_indx(gd_t *gd,
         for (int n3=0; n3<2; n3++) {
             for (int n1=0; n1<2; n1++) {
               int iptr_cube = n1 + n3 * 2;
-              int iptr = (cur_i+n1)  + (cur_k+n3) * siz_iz;
+              int iptr = (cur_i+n1) + (cur_k+n3) * siz_iz;
               points_x[iptr_cube] = x2d[iptr];
               points_z[iptr_cube] = z2d[iptr];
               points_i[iptr_cube] = cur_i+n1;
@@ -849,8 +849,8 @@ gd_curv_coord_to_local_indx(gd_t *gd,
 
   // if not in any cube due to bug, set default value
   //    if everything is right, should be return 10 line before
-  *si = min_dist_i;
-  *sk = min_dist_k;
+  *si = -1000;
+  *sk = -1000;
   *sx_inc = 0.0;
   *sz_inc = 0.0;
 

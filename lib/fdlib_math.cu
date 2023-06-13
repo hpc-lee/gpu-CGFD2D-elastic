@@ -236,6 +236,6 @@ fdlib_math_isPoint2InQuad(float px, float py, const float *vertx, const float *v
             return 0;
     }
 
-    return 0;
+    return 1;
 }
 
