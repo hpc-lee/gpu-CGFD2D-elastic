@@ -16,12 +16,12 @@ xzc = nc_attget(fnm_media,nc_global,'count_of_physical_points');
 xzc = double(xzc);
 
 if(subc(1) == -1)
-  xc = floor(xzc(1)/subt(1))-subs(1)+1;
+  xc = ceil((xzc(1)-subs(1)+1)/subt(1));
 else
   xc = subc(1);
 end
 if(subc(2) == -1)
-  zc = floor(xzc(2)/subt(2))-subs(2)+1;
+  zc = ceil((xzc(2)-subs(2)+1)/subt(2));
 else
   zc = subc(2);
 end

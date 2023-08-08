@@ -4,8 +4,8 @@ clc;
 addmypath
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project/test.json'
-output_dir='../project/output'
+parfnm='../project2/test.json'
+output_dir='../project2/output'
 
 % which grid profile to plot
 subs=[1,1];     % start from index '1'
@@ -16,11 +16,12 @@ subt=[1,1];
 id=1;
 
 % variable and time to plot
-varnm='Exx';
-ns=600;
-ne=600;
-nt=50;
+varnm='Vx';
+ns=100;
+ne=2400;
+nt=100;
 
+% scl_caxis=[-50.0 50.0];
 % read parameters file
 par=loadjson(parfnm);
 snap_subs=par.snapshot{1}.grid_index_start;
@@ -37,17 +38,16 @@ subt1(1) = snap_subt(1) * subt(1); %stride
 subt1(2) = snap_subt(2) * subt(2);
 
 if(subc(1) == -1)
-  subc1(1) = floor(snap_subc(1)/subt(1))-subs(1)+1;
+  subc1(1) = ceil((snap_subc(1)-subs(1)+1)/subt(1));
 else
   subc1(1) = subc(1);
 end
 
 if(subc(2) == -1)
-  subc1(2) = floor(snap_subc(2)/subt(2))-subs(2)+1;
+  subc1(2) = ceil((snap_subc(2)-subs(2)+1)/subt(2));
 else
   subc1(2) = subc(2);
 end
-
 
 % figure control parameters
 flag_km     = 1;
@@ -55,7 +55,7 @@ flag_emlast = 1;
 flag_print  = 0;
 savegif = 0;
 
-% scl_caxis=[-10.0 10.0];
+
 filename1 = ['Vz2.gif'];
 scl_daspect =[1 1 1];
 clrmp       = 'jetwr';

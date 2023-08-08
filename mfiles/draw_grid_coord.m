@@ -5,18 +5,18 @@ addmypath
 
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project/test.json';
-output_dir='../project/output';
+parfnm='../project2/test.json';
+output_dir='../project2/output';
 
 % which grid profile to plot
-subs=[5,5];     % start from index '1'
+subs=[1,1];     % start from index '1'
 subc=[-1,-1];   % '-1' to plot all points in this dimension
-subt=[2,2];
+subt=[1,1];
 
 % figure control parameters
 flag_km     = 1;
 flag_emlast = 1;
-flag_print  = 0;
+flag_print  = 1;
 flag_title  = 1;
 scl_daspect = [1 1 1];
 %-----------------------------------------------------------
@@ -71,5 +71,5 @@ if flag_print
     set(gcf,'paperunits','points');
     set(gcf,'papersize',[width,height]);
     set(gcf,'paperposition',[0,0,width,height]);
-    print(gcf,[gridtitle '.png'],'-dpng');
+    print(gcf,[gridtitle '4.png'],'-dpng');
 end

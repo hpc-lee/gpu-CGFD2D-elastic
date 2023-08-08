@@ -22,12 +22,12 @@ snap_subc = double(snap_subc);
 xs = subs(1) -1; 
 zs = subs(2) -1; 
 if(subc(1) == -1)
-  xc = floor(snap_subc(1)/subt(1))-subs(1)+1;
+  xc = ceil((xzc(1)-subs(1)+1)/subt(1));
 else
   xc = subc(1);
 end
 if(subc(2) == -1)
-  zc = floor(snap_subc(2)/subt(2))-subs(2)+1;
+  zc = ceil((xzc(2)-subs(2)+1)/subt(2));
 else
   zc = subc(2);
 end
