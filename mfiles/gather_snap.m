@@ -22,12 +22,12 @@ snap_subc = double(snap_subc);
 xs = subs(1) -1; 
 zs = subs(2) -1; 
 if(subc(1) == -1)
-  xc = ceil((xzc(1)-subs(1)+1)/subt(1));
+  xc = ceil((snap_subc(1)-subs(1)+1)/subt(1));
 else
   xc = subc(1);
 end
 if(subc(2) == -1)
-  zc = ceil((xzc(2)-subs(2)+1)/subt(2));
+  zc = ceil((snap_subc(2)-subs(2)+1)/subt(2));
 else
   zc = subc(2);
 end
@@ -44,6 +44,6 @@ v(k1:k2,i1:i2)=nc_varget(fnm_snap,varnm, ...
       [nlayer-1,zs,xs],[1,zc,xc],[1,zt,xt]);
 t=nc_varget(fnm_snap,'time',[nlayer-1],[1]);
 
-v=v';
+%v=v';
 
 end

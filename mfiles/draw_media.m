@@ -9,9 +9,9 @@ parfnm='../project1/test.json';
 output_dir='../project1/output';
 
 % which grid profile to plot
-subs=[5,5];     % start from index '1'
-subc=[100,100];   % '-1' to plot all points in this dimension
-subt=[2,2];
+subs=[1,100];     % start from index '1'
+subc=[-1,-1];   % '-1' to plot all points in this dimension
+subt=[1,2];
 
 %media_type = 'ac_iso';
 media_type = 'el_iso';

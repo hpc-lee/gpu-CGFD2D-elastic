@@ -9,14 +9,14 @@ parfnm='../project2/test.json';
 output_dir='../project2/output';
 
 % which grid profile to plot
-subs=[1,1];     % start from index '1'
+subs=[1,100];     % start from index '1'
 subc=[-1,-1];   % '-1' to plot all points in this dimension
-subt=[1,1];
+subt=[1,2];
 
 % figure control parameters
 flag_km     = 1;
 flag_emlast = 1;
-flag_print  = 1;
+flag_print  = 0;
 flag_title  = 1;
 scl_daspect = [1 1 1];
 %-----------------------------------------------------------

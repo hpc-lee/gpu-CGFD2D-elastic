@@ -57,7 +57,7 @@ else % curv grid
 end
     
 
-x=x';
-z=z';
+%x=x';
+%z=z';
 
 end

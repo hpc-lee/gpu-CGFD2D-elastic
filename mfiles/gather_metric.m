@@ -37,6 +37,6 @@ k2 = k1 + zc - 1;
 
 v(k1:k2,i1:i2)=nc_varget(fnm_metric,varnm,[zs,xs],[zc,xc],[zt,xt]);
 
-v=v';
+%v=v';
 
 end

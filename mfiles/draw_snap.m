@@ -8,9 +8,9 @@ parfnm='../project2/test.json'
 output_dir='../project2/output'
 
 % which grid profile to plot
-subs=[1,1];     % start from index '1'
+subs=[1,100];     % start from index '1'
 subc=[-1,-1];   % '-1' to plot all points in this dimension
-subt=[1,1];
+subt=[1,2];
 
 % which snapshot to plot
 id=1;
