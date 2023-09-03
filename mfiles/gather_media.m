@@ -7,8 +7,11 @@ if ~ exist(fnm_media,'file')
    error([mfilename ': file ' fnm_media 'does not exist']);
 end
 
-xs = subs(1) - 1; 
-zs = subs(2) - 1; 
+xzs = nc_attget(fnm_media,nc_global,'local_index_of_first_physical_points');
+xzs = double(xzs);
+
+xs = subs(1) - 1 + xzs(1); 
+zs = subs(2) - 1 + xzs(2); 
 
 xzc = nc_attget(fnm_media,nc_global,'count_of_physical_points');
 xzc = double(xzc);
