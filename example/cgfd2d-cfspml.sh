@@ -33,9 +33,9 @@ mkdir -p $MEDIA_DIR
 #----------------------------------------------------------------------
 
 #-- total x grid points
-NX=197
+NX=341
 #-- total z grid points
-NZ=201
+NZ=301
 #----------------------------------------------------------------------
 #-- create main conf
 #----------------------------------------------------------------------
@@ -44,14 +44,14 @@ cat << ieof > $PAR_FILE
   "number_of_total_grid_points_x" : ${NX},
   "number_of_total_grid_points_z" : ${NZ},
 
-  "size_of_time_step" : 0.001,
-  "number_of_time_steps" : 10000,
-  "#time_window_length" : 2,
+  "#size_of_time_step" : 0.001,
+  "#number_of_time_steps" : 12000,
+  "time_window_length" : 5,
   "check_stability" : 1,
 
   "boundary_x_left" : {
       "cfspml" : {
-          "number_of_layers" : 10,
+          "number_of_layers" : 20,
           "alpha_max" : 3.14,
           "beta_max" : 2.0,
           "ref_vel"  : 5000.0
@@ -59,7 +59,7 @@ cat << ieof > $PAR_FILE
       },
   "boundary_x_right" : {
       "cfspml" : {
-          "number_of_layers" : 10,
+          "number_of_layers" : 20,
           "alpha_max" : 3.14,
           "beta_max" : 2.0,
           "ref_vel"  : 5000.0
@@ -67,7 +67,7 @@ cat << ieof > $PAR_FILE
       },
   "boundary_z_bottom" : {
       "cfspml" : {
-          "number_of_layers" : 10,
+          "number_of_layers" : 20,
           "alpha_max" : 3.14,
           "beta_max" : 2.0,
           "ref_vel"  : 5000.0
@@ -78,10 +78,11 @@ cat << ieof > $PAR_FILE
       },
 
   "grid_generation_method" : {
-      "import" : "$INPUTDIR/grid_model1",
+      "#import" : "$INPUTDIR/grid_model1",
+      "import" : "./",
       "#cartesian" : {
-         "origin"  : [0.0, -29900.0 ],
-         "inteval" : [ 100.0, 100.0 ]
+         "origin"  : [0.0, -2990.0 ],
+         "inteval" : [ 10.0, 10.0 ]
       }
   },
   "is_export_grid" : 1,
@@ -94,7 +95,7 @@ cat << ieof > $PAR_FILE
   "is_export_metric" : 1,
 
   "medium" : {
-      "type" : "elastic_vti",
+      "type" : "elastic_iso",
       "#input_way" : "infile_layer",
       "#input_way" : "binfile",
       "input_way" : "code",
@@ -180,7 +181,7 @@ cat << ieof > ${PROJDIR}/cgfd_sim.sh
 set -e
 
 printf "\nStart simualtion ...\n";
-time $EXEC_WAVE $PAR_FILE 100 2>&1 |tee log2
+time $EXEC_WAVE $PAR_FILE 100 5 2>&1 |tee log1
 if [ $? -ne 0 ]; then
     printf "\nSimulation fail! stop!\n"
     exit 1

@@ -20,6 +20,8 @@ MEDIA_DIR=${PROJDIR}/output
 SOURCE_DIR=${PROJDIR}/output
 OUTPUT_DIR=${PROJDIR}/output
 
+rm -rf ${PROJDIR}
+
 #-- create dir
 mkdir -p $PROJDIR
 mkdir -p $OUTPUT_DIR
@@ -172,7 +174,7 @@ cat << ieof > ${PROJDIR}/cgfd_sim.sh
 set -e
 
 printf "\nStart simualtion ...\n";
-time $EXEC_WAVE $PAR_FILE 100 2>&1 |tee log
+time $EXEC_WAVE $PAR_FILE 100 4 2>&1 |tee log
 if [ $? -ne 0 ]; then
     printf "\nSimulation fail! stop!\n"
     exit 1

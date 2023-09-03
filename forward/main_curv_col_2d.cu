@@ -24,33 +24,29 @@
 
 int main(int argc, char** argv)
 {
-  int verbose = 1; // default fprint
+  int verbose; 
+  int gpu_id_start;
   char *par_fname;
   char err_message[CONST_MAX_STRLEN];
 
-//-------------------------------------------------------------------------------
-// initial gpu device before start MPI
-//-------------------------------------------------------------------------------
-  setDeviceBeforeInit();
-//-------------------------------------------------------------------------------
-// get commond-line argument
-//-------------------------------------------------------------------------------
-
+  // get commond-line argument
   // argc checking
-  if (argc < 2) {
-    fprintf(stdout,"usage: main_curv_col_el_2d <par_file> <opt: verbose>\n");
+  if (argc < 4) {
+    fprintf(stdout,"usage: cgfdm3d_elastic <par_file> <opt: verbose>\n");
     exit(1);
   }
 
-  //strncpy(par_fname, argv[1], sizeof(argv[1]));
   par_fname = argv[1];
 
-  if (argc >= 3) {
+  if (argc >= 4) {
     verbose = atoi(argv[2]); // verbose number
     fprintf(stdout,"verbose=%d\n", verbose); fflush(stdout);
+    gpu_id_start = atoi(argv[3]); // gpu_id_start number
+    fprintf(stdout,"gpu_id_start=%d\n",gpu_id_start ); fflush(stdout);
   }
-
   fprintf(stdout,"par file =  %s\n", par_fname); fflush(stdout);
+
+  setDeviceBeforeInit(gpu_id_start);
 
   // read par
 
