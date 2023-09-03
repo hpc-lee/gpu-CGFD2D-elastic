@@ -1,4 +1,4 @@
-function [x,z] = gather_coord(parfnm,output_dir,subs,subc,subt)
+function [x,z] = gather_coord(output_dir,subs,subc,subt)
 
 % load
 fnm_coord=[output_dir,'/','coord.nc'];
@@ -7,10 +7,8 @@ if ~ exist(fnm_coord,'file')
    error([mfilename ': file ' fnm_coord 'does not exist']);
 end
 
-xzs = nc_attget(fnm_coord,nc_global,'local_index_of_first_physical_points');
-xzs = double(xzs);
-xs = subs(1) -1 + xzs(1); 
-zs = subs(2) -1 + xzs(2); 
+xs = subs(1) - 1; 
+zs = subs(2) - 1; 
 
 xzc = nc_attget(fnm_coord,nc_global,'count_of_physical_points');
 xzc = double(xzc);
@@ -56,8 +54,4 @@ else % curv grid
   z(k1:k2,i1:i2)=nc_varget(fnm_coord,'z',[zs,xs],[zc,xc],[zt,xt]);
 end
     
-
-%x=x';
-%z=z';
-
 end

@@ -5,13 +5,13 @@ addmypath
 
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project2/test.json';
-output_dir='../project2/output';
+parfnm='../project1/test.json';
+output_dir='../project1/output';
 
 % which grid profile to plot
-subs=[1,100];     % start from index '1'
+subs=[100,100];     % start from index '1'
 subc=[-1,-1];   % '-1' to plot all points in this dimension
-subt=[1,2];
+subt=[2,2];
 
 % figure control parameters
 flag_km     = 1;
@@ -23,7 +23,7 @@ scl_daspect = [1 1 1];
 %-- load coord
 %-----------------------------------------------------------
 
-[x,z]=gather_coord(parfnm,output_dir,subs,subc,subt);
+[x,z]=gather_coord(output_dir,subs,subc,subt);
 
 %- set coord unit
 flag_km     = 1;
@@ -41,9 +41,9 @@ end
 hid = figure;
 set(hid,'BackingStore','on');
 
-plot(x,z,'k-');
+plot(x,z,'r-');
 hold on
-plot(x',z','k-');
+plot(x',z','r-');
   
 xlabel(['X axis (' str_unit ')']);
 ylabel(['Z axis (' str_unit ')']);

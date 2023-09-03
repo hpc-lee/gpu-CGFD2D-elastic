@@ -5,8 +5,8 @@ addmypath
 
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project2/test.json';
-output_dir='../project2/output';
+parfnm='../project1/test.json';
+output_dir='../project1/output';
 
 % which grid profile to plot
 subs=[1,100];     % start from index '1'
@@ -29,9 +29,9 @@ varnm = 'xi_x';
 %-- load coord
 %-----------------------------------------------------------
 
-[x,z]=gather_coord(parfnm,output_dir,subs,subc,subt);
+[x,z]=gather_coord(output_dir,subs,subc,subt);
 
-[v]=gather_metric(parfnm,output_dir,varnm,subs,subc,subt);
+[v]=gather_metric(output_dir,varnm,subs,subc,subt);
 
 %- set coord unit
 flag_km     = 1;

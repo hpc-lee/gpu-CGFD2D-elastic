@@ -31,30 +31,30 @@ varnm = 'Vs';
 %-- load coord
 %-----------------------------------------------------------
 
-[x,z]=gather_coord(parfnm,output_dir,subs,subc,subt);
+[x,z]=gather_coord(output_dir,subs,subc,subt);
 
 switch varnm
     case 'Vp'
-        rho=gather_media(parfnm,output_dir,'rho',subs,subc,subt);
+        rho=gather_media(output_dir,'rho',subs,subc,subt);
         if strcmp(media_type,'ac_iso') == 1
-          kappa=gather_media(parfnm,output_dir,'kappa',subs,subc,subt);
+          kappa=gather_media(output_dir,'kappa',subs,subc,subt);
           v=( (kappa)./rho ).^0.5;
         elseif strcmp(media_type,'el_iso') == 1
-          mu=gather_media(parfnm,output_dir,'mu',subs,subc,subt);
-          lambda=gather_media(parfnm,output_dir,'lambda',subs,subc,subt);
+          mu=gather_media(output_dir,'mu',subs,subc,subt);
+          lambda=gather_media(output_dir,'lambda',subs,subc,subt);
           v=( (lambda+2*mu)./rho ).^0.5;
         end
         v=v/1e3;
     case 'Vs'
-        rho=gather_media(parfnm,output_dir,'rho',subs,subc,subt);
-        mu=gather_media(parfnm,output_dir,'mu',subs,subc,subt);
+        rho=gather_media(output_dir,'rho',subs,subc,subt);
+        mu=gather_media(output_dir,'mu',subs,subc,subt);
         v=( mu./rho ).^0.5;
         v=v/1e3;
     case 'rho'
-        v=gather_media(parfnm,output_dir,varnm,subs,subc,subt);
+        v=gather_media(output_dir,varnm,subs,subc,subt);
         v=v/1e3;
     otherwise
-        v=gather_media(parfnm,output_dir,varnm,subs,subc,subt);
+        v=gather_media(output_dir,varnm,subs,subc,subt);
 end
 
 %- set coord unit

@@ -1,4 +1,4 @@
-function [v] = gather_media(parfnm,output_dir,varnm,subs,subc,subt)
+function [v] = gather_media(output_dir,varnm,subs,subc,subt)
 
 % load
 fnm_media=[output_dir,'/','media.nc'];
@@ -7,10 +7,8 @@ if ~ exist(fnm_media,'file')
    error([mfilename ': file ' fnm_media 'does not exist']);
 end
 
-xzs = nc_attget(fnm_media,nc_global,'local_index_of_first_physical_points');
-xzs = double(xzs);
-xs = subs(1) -1 + xzs(1); 
-zs = subs(2) -1 + xzs(2); 
+xs = subs(1) - 1; 
+zs = subs(2) - 1; 
 
 xzc = nc_attget(fnm_media,nc_global,'count_of_physical_points');
 xzc = double(xzc);
@@ -35,7 +33,5 @@ k1 = 1;
 k2 = k1 + zc - 1;
 
 v(k1:k2,i1:i2)=nc_varget(fnm_media,varnm,[zs,xs],[zc,xc],[zt,xt]);
-
-%v=v';
 
 end

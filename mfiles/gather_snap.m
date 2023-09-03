@@ -9,7 +9,7 @@ if ~ exist(fnm_snap,'file')
 end
 
 tdim=nc_getdiminfo(fnm_snap,'time');
-if tdim.Length==0 | (nlayer-1)-1>=tdim.Length
+if tdim.Length==0 || (nlayer-1)-1>=tdim.Length
    error([num2str(nlayer) 'th layer is beyond current time dim (' ...
         num2str(tdim.Length) ') in ' fnm_snap]);
 end
