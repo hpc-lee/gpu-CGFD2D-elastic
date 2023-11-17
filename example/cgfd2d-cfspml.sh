@@ -13,7 +13,7 @@ echo "EXEC_WAVE=$EXEC_WAVE"
 INPUTDIR=`pwd`
 
 #-- output and conf
-PROJDIR=`pwd`/../project1
+PROJDIR=`pwd`/../project
 PAR_FILE=${PROJDIR}/test.json
 GRID_DIR=${PROJDIR}/output
 MEDIA_DIR=${PROJDIR}/output
@@ -78,8 +78,7 @@ cat << ieof > $PAR_FILE
       },
 
   "grid_generation_method" : {
-      "#import" : "$INPUTDIR/grid_model1",
-      "import" : "./",
+      "import" : "$INPUTDIR/grid_model1",
       "#cartesian" : {
          "origin"  : [0.0, -2990.0 ],
          "inteval" : [ 10.0, 10.0 ]

@@ -427,9 +427,6 @@ void
 gd_curv_coord_export(gd_t *gdcurv,
                      char *output_dir)
 {
-  int number_of_vars = gdcurv->ncmp;
-  int nx = gdcurv->nx;
-  int nz = gdcurv->nz;
   int ni  = gdcurv->ni;
   int nk  = gdcurv->nk;
   int ni1 = gdcurv->ni1;
@@ -508,8 +505,6 @@ gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
   
   int ni = gdcurv->ni;
   int nk = gdcurv->nk;
-  int nx = gdcurv->nx;
-  int nz = gdcurv->nz;
   int ni1 = gdcurv->ni1;
   int nk1 = gdcurv->nk1;
   int ni2 = gdcurv->ni2;
