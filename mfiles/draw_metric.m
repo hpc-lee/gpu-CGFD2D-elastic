@@ -5,8 +5,8 @@ addmypath
 
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project1/test.json';
-output_dir='../project1/output';
+parfnm='../project/test.json';
+output_dir='../project/output';
 
 % which grid profile to plot
 subs=[1,1];     % start from index '1'
@@ -24,7 +24,7 @@ clrmp       = 'parula';
 
 % varable to plot 
 % 'jac', 'xi_x', 'xi_z', 'zeta_x', 'zeta_z'
-varnm = 'xi_x';
+varnm = 'jac';
 %-----------------------------------------------------------
 %-- load coord
 %-----------------------------------------------------------
