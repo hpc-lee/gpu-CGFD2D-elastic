@@ -171,7 +171,7 @@ int main(int argc, char** argv)
     case PAR_METRIC_IMPORT : {
 
       if (verbose>0) fprintf(stdout,"import metric file ...\n"); 
-      gd_curv_metric_import(gdcurv_metric, par->grid_import_dir);
+      gd_curv_metric_import(gdcurv, gdcurv_metric, par->grid_import_dir);
 
       break;
     }
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     }
     case PAR_MEDIA_IMPORT : {
       if (verbose>0) fprintf(stdout,"import discrete medium file ...\n"); 
-      md_import(md, par->grid_import_dir);
+      md_import(gdcurv, md, par->grid_import_dir);
 
       break;
     }

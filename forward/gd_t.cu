@@ -16,10 +16,7 @@
 #include "fd_t.h"
 #include "gd_t.h"
 
-// used in read grid file
-#define M_gd_INDEX( i, k, ni ) ( ( i ) + ( k ) * ( ni ) )
-
-void 
+int 
 gd_curv_init(gd_t *gdcurv)
 {
   /*
@@ -66,10 +63,10 @@ gd_curv_init(gd_t *gdcurv)
   gdcurv->cmp_pos  = cmp_pos;
   gdcurv->cmp_name = cmp_name;
 
-  return;
+  return 0;
 }
 
-void 
+int 
 gd_curv_metric_init(gd_t        *gdcurv,
                     gdcurv_metric_t *metric)
 {
@@ -134,12 +131,14 @@ gd_curv_metric_init(gd_t        *gdcurv,
   // set pointer
   metric->cmp_pos  = cmp_pos;
   metric->cmp_name = cmp_name;
+
+  return 0;
 }
 
 //
 // need to change to use fdlib_math.c
 //
-void
+int
 gd_curv_metric_cal(gd_t        *gdcurv,
                    gdcurv_metric_t *metric,
                    int fd_len, int * fd_indx, float * fd_coef)
@@ -217,10 +216,11 @@ gd_curv_metric_cal(gd_t        *gdcurv,
   mirror_symmetry(gdcurv,metric->v3d,metric->ncmp);
   //geometric_symmetry(gdcurv,metric->v3d,metric->ncmp);
 
-  return;
+  return 0;
 }
 
-int mirror_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
+int 
+mirror_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
 {
   int ni1 = gdcurv->ni1;
   int ni2 = gdcurv->ni2;
@@ -273,7 +273,8 @@ int mirror_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
   return 0;
 }
 
-int geometric_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
+int 
+geometric_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
 {
   int ni1 = gdcurv->ni1;
   int ni2 = gdcurv->ni2;
@@ -333,7 +334,7 @@ int geometric_symmetry(gd_t *gdcurv,float *v3d, int ncmp)
 /*
  * generate cartesian grid for curv struct
  */
-void
+int
 gd_curv_gen_cart(gd_t *gdcurv,
                  float dx, float x0_glob,
                  float dz, float z0_glob)
@@ -356,14 +357,14 @@ gd_curv_gen_cart(gd_t *gdcurv,
       }
   }
 
-  return;
+  return 0;
 }
 
 /*
  * generate cartesian grid
  */
 
-void 
+int 
 gd_cart_init_set(gd_t *gdcart,
                  float dx, float x0_glob,
                  float dz, float z0_glob)
@@ -417,13 +418,13 @@ gd_cart_init_set(gd_t *gdcart,
   gdcart->x1d = x1d;
   gdcart->z1d = z1d;
   
-  return;
+  return 0;
 }
 
 //
 // input/output
 //
-void
+int
 gd_curv_coord_export(gd_t *gdcurv,
                      char *output_dir)
 {
@@ -493,10 +494,10 @@ gd_curv_coord_export(gd_t *gdcurv,
   free(coord_x);
   free(coord_z);
 
-  return;
+  return 0;
 }
 
-void
+int
 gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
 {
   // construct file name
@@ -549,106 +550,10 @@ gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
   free(coord_x);
   free(coord_z);
 
-  return;
+  return 0;
 }
 
-/*
-void
-gd_curv_coord_export(gd_t *gdcurv,
-                     char *output_dir)
-{
-  size_t * c3d_pos   = gdcurv->cmp_pos;
-  char  ** c3d_name  = gdcurv->cmp_name;
-  int number_of_vars = gdcurv->ncmp;
-  int  nx = gdcurv->nx;
-  int  nz = gdcurv->nz;
-  int  ni1 = gdcurv->ni1;
-  int  nk1 = gdcurv->nk1;
-  int  ni  = gdcurv->ni;
-  int  nk  = gdcurv->nk;
-
-  // construct file name
-  char ou_file[CONST_MAX_STRLEN];
-  sprintf(ou_file, "%s/coord.nc", output_dir);
-  
-  // read in nc
-  int ncid;
-  int varid[gdcurv->ncmp];
-  int dimid[CONST_NDIM];
-
-  int ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
-  handle_nc_err(ierr);
-
-  // define dimension
-  ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
-  handle_nc_err(ierr);
-  ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
-  handle_nc_err(ierr);
-
-  // define vars
-  for (int ivar=0; ivar<gdcurv->ncmp; ivar++) {
-    ierr = nc_def_var(ncid, gdcurv->cmp_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
-    handle_nc_err(ierr);
-  }
-
-  // attribute: index in output snapshot, index w ghost in thread
-  int l_start[] = { ni1, nk1 };
-  nc_put_att_int(ncid,NC_GLOBAL,"local_index_of_first_physical_points",
-                   NC_INT,CONST_NDIM,l_start);
-
-  int l_count[] = { ni, nk };
-  nc_put_att_int(ncid,NC_GLOBAL,"count_of_physical_points",
-                   NC_INT,CONST_NDIM,l_count);
-
-  // end def
-  ierr = nc_enddef(ncid);
-  handle_nc_err(ierr);
-
-  // add vars
-  for (int ivar=0; ivar<gdcurv->ncmp; ivar++) {
-    float *ptr = gdcurv->v3d + gdcurv->cmp_pos[ivar];
-    ierr = nc_put_var_float(ncid, varid[ivar],ptr);
-    handle_nc_err(ierr);
-  }
-  
-  // close file
-  ierr = nc_close(ncid);
-  handle_nc_err(ierr);
-
-  return;
-}
-
-void
-gd_curv_coord_import(gd_t *gdcurv, char *import_dir)
-{
-  // construct file name
-  char in_file[CONST_MAX_STRLEN];
-  sprintf(in_file, "%s/coord.nc", import_dir);
-  
-  // read in nc
-  int ncid;
-  int varid;
-
-  int ierr = nc_open(in_file, NC_NOWRITE, &ncid);  handle_nc_err(ierr);
-
-  // read vars
-  for (int ivar=0; ivar<gdcurv->ncmp; ivar++)
-  {
-    float *ptr = gdcurv->v3d + gdcurv->cmp_pos[ivar];
-
-    ierr = nc_inq_varid(ncid, gdcurv->cmp_name[ivar], &varid);  handle_nc_err(ierr);
-
-    ierr = nc_get_var(ncid, varid, ptr);  handle_nc_err(ierr);
-  }
-  
-  // close file
-  ierr = nc_close(ncid);  handle_nc_err(ierr);
-
-  return;
-}
-*/
-
-void
+int
 gd_cart_coord_export(gd_t *gdcart,
                      char *output_dir)
 {
@@ -656,8 +561,28 @@ gd_cart_coord_export(gd_t *gdcart,
   int  nz = gdcart->nz;
   int  ni1 = gdcart->ni1;
   int  nk1 = gdcart->nk1;
+  int  ni2 = gdcart->ni2;
+  int  nk2 = gdcart->nk2;
   int  ni  = gdcart->ni;
   int  nk  = gdcart->nk;
+  float *x1d = gdcart->x1d;
+  float *z1d = gdcart->z1d;
+  float *coord_x = (float *) malloc(sizeof(float)*nk);  
+  float *coord_z = (float *) malloc(sizeof(float)*ni);  
+  int iptr, iptr1;
+
+  for (int k=nk1; k<=nk2; k++) 
+  {
+    iptr  = k;
+    iptr1 = k-3;
+    coord_x[iptr1] = x1d[iptr]; 
+  }
+  for (int i=ni1; i<=ni2; i++) 
+  {
+    iptr  = i;
+    iptr1 = i-3;
+    coord_z[iptr1] = z1d[iptr];
+  }
 
   // construct file name
   char ou_file[CONST_MAX_STRLEN];
@@ -665,29 +590,25 @@ gd_cart_coord_export(gd_t *gdcart,
   
   // read in nc
   int ncid;
-  int varid[CONST_NDIM];
+  int xid, zid;
   int dimid[CONST_NDIM];
 
   int ierr = nc_create(ou_file, NC_CLOBBER, &ncid);
   handle_nc_err(ierr);
 
   // define dimension
-  ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  ierr = nc_def_dim(ncid, "i", ni, &dimid[1]);
   handle_nc_err(ierr);
-  ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  ierr = nc_def_dim(ncid, "k", nk, &dimid[0]);
   handle_nc_err(ierr);
 
   // define vars
-  ierr = nc_def_var(ncid, "x", NC_FLOAT, 1, dimid+1, &varid[0]);
+  ierr = nc_def_var(ncid, "x", NC_FLOAT, 1, dimid+1, &xid);
   handle_nc_err(ierr);
-  ierr = nc_def_var(ncid, "z", NC_FLOAT, 1, dimid+0, &varid[1]);
+  ierr = nc_def_var(ncid, "z", NC_FLOAT, 1, dimid+0, &zid);
   handle_nc_err(ierr);
 
   // attribute: index in output snapshot, index w ghost in thread
-  int l_start[] = { ni1, nk1 };
-  nc_put_att_int(ncid,NC_GLOBAL,"local_index_of_first_physical_points",
-                   NC_INT,CONST_NDIM,l_start);
-
   int l_count[] = { ni, nk };
   nc_put_att_int(ncid,NC_GLOBAL,"count_of_physical_points",
                    NC_INT,CONST_NDIM,l_count);
@@ -697,32 +618,41 @@ gd_cart_coord_export(gd_t *gdcart,
   handle_nc_err(ierr);
 
   // add vars
-  ierr = nc_put_var_float(ncid, varid[0], gdcart->x1d);
+  ierr = nc_put_var_float(ncid, xid, coord_x);
   handle_nc_err(ierr);
-  ierr = nc_put_var_float(ncid, varid[1], gdcart->z1d);
+  ierr = nc_put_var_float(ncid, zid, coord_z);
   handle_nc_err(ierr);
   
   // close file
   ierr = nc_close(ncid);
   handle_nc_err(ierr);
 
-  return;
+  free(coord_x);
+  free(coord_z);
+
+  return 0;
 }
 
-void
+int
 gd_curv_metric_export(gd_t        *gd,
                       gdcurv_metric_t *metric,
                       char *output_dir)
 {
-  size_t * g3d_pos   = metric->cmp_pos;
-  char  ** g3d_name  = metric->cmp_name;
   int  number_of_vars = metric->ncmp;
-  int  nx = metric->nx;
-  int  nz = metric->nz;
+  int  nx = gd->nx;
+  int  nz = gd->nz;
   int  ni1 = gd->ni1;
   int  nk1 = gd->nk1;
+  int  ni2 = gd->ni2;
+  int  nk2 = gd->nk2;
   int  ni  = gd->ni;
   int  nk  = gd->nk;
+  int  gni1 = gd->gni1;
+  int  gnk1 = gd->gnk1;
+  size_t  siz_iz = gd->siz_iz;
+  size_t iptr, iptr1;
+
+  float *var_out = (float *) malloc(sizeof(float)*ni*nk);
 
   // construct file name
   char ou_file[CONST_MAX_STRLEN];
@@ -737,22 +667,18 @@ gd_curv_metric_export(gd_t        *gd,
   handle_nc_err(ierr);
 
   // define dimension
-  ierr = nc_def_dim(ncid, "i", nx, &dimid[1]);
+  ierr = nc_def_dim(ncid, "i", ni, &dimid[1]);
   handle_nc_err(ierr);
-  ierr = nc_def_dim(ncid, "k", nz, &dimid[0]);
+  ierr = nc_def_dim(ncid, "k", nk, &dimid[0]);
   handle_nc_err(ierr);
 
   // define vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
-    ierr = nc_def_var(ncid, g3d_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
+    ierr = nc_def_var(ncid, metric->cmp_name[ivar], NC_FLOAT, CONST_NDIM, dimid, &varid[ivar]);
     handle_nc_err(ierr);
   }
 
-  // attribute: index in output snapshot, index w ghost in thread
-  int l_start[] = { ni1, nk1 };
-  nc_put_att_int(ncid,NC_GLOBAL,"local_index_of_first_physical_points",
-                   NC_INT,CONST_NDIM,l_start);
-
+  // attribute:
   int l_count[] = { ni, nk };
   nc_put_att_int(ncid,NC_GLOBAL,"count_of_physical_points",
                    NC_INT,CONST_NDIM,l_count);
@@ -763,22 +689,48 @@ gd_curv_metric_export(gd_t        *gd,
 
   // add vars
   for (int ivar=0; ivar<number_of_vars; ivar++) {
-    float *ptr = metric->v3d + g3d_pos[ivar];
-    ierr = nc_put_var_float(ncid, varid[ivar],ptr);
+    float *ptr = metric->v3d + metric->cmp_pos[ivar];
+    for(int k=nk1; k<=nk2; k++) {
+      for(int i=ni1; i<=ni2; i++)
+      {
+        iptr = i + k*siz_iz; 
+        iptr1 = (i-3) + (k-3)*ni; 
+        var_out[iptr1] = ptr[iptr];
+      }
+    }
+    ierr = nc_put_var_float(ncid, varid[ivar], var_out); 
     handle_nc_err(ierr);
   }
   
   // close file
   ierr = nc_close(ncid);
   handle_nc_err(ierr);
+
+  free(var_out);
+
+  return 0;
 }
 
-void
-gd_curv_metric_import(gdcurv_metric_t *metric, char *import_dir)
+int
+gd_curv_metric_import(gd_t *gd, gdcurv_metric_t *metric, char *import_dir)
 {
   // construct file name
   char in_file[CONST_MAX_STRLEN];
   sprintf(in_file, "%s/metric.nc", import_dir);
+
+  int ni1 = gd->ni1;
+  int nk1 = gd->nk1;
+  int ni2 = gd->ni2;
+  int nk2 = gd->nk2;
+  int ni  = gd->ni;
+  int nk  = gd->nk;
+  size_t  siz_iz = gd->siz_iz;
+  
+  size_t iptr, iptr1;
+  
+  float *var_in = (float *) malloc(sizeof(float)*ni*nk);
+  size_t start[] = {0, 0};
+  size_t count[] = {nk, ni};
   
   // read in nc
   int ncid;
@@ -790,23 +742,32 @@ gd_curv_metric_import(gdcurv_metric_t *metric, char *import_dir)
   // read vars
   for (int ivar=0; ivar<metric->ncmp; ivar++)
   {
-    float *ptr = metric->v3d + metric->cmp_pos[ivar];
-
     ierr = nc_inq_varid(ncid, metric->cmp_name[ivar], &varid);
     handle_nc_err(ierr);
-
-    ierr = nc_get_var(ncid, varid, ptr);
+    ierr = nc_get_var(ncid, varid, var_in);
     handle_nc_err(ierr);
+    float *ptr = metric->v3d + metric->cmp_pos[ivar];
+    for(int k=nk1; k<=nk2; k++) {
+      for(int i=ni1; i<=ni2; i++)
+      {
+        iptr = i + k*siz_iz; 
+        iptr1 = (i-3) + (k-3)*ni; 
+        ptr[iptr] = var_in[iptr1];
+      }
+    }
   }
+  geometric_symmetry(gd,metric->v3d,metric->ncmp);
   
   // close file
   ierr = nc_close(ncid);
   handle_nc_err(ierr);
 
-  return;
+  free(var_in);
+
+  return 0;
 }
 
-void
+int
 gd_curv_set_minmax(gd_t *gdcurv)
 {
   float xmin = gdcurv->x2d[0], xmax = gdcurv->x2d[0];
@@ -824,7 +785,7 @@ gd_curv_set_minmax(gd_t *gdcurv)
   gdcurv->zmin = zmin;
   gdcurv->zmax = zmax;
 
-  return;
+  return 0;
 }
 
 /*
