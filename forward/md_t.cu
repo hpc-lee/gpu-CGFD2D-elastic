@@ -179,7 +179,7 @@ md_import(gd_t *gd, md_t *md, char *in_dir)
 {
   // construct file name
   char in_file[CONST_MAX_STRLEN];
-  sprintf(in_file, "%s/media.nc", in_dir);
+  sprintf(in_file, "%s/media_px0_pz0.nc", in_dir);
 
   int ni1 = gd->ni1;
   int nk1 = gd->nk1;
@@ -255,7 +255,7 @@ md_export(gd_t  *gd,
 
   // construct file name
   char ou_file[CONST_MAX_STRLEN];
-  sprintf(ou_file, "%s/media.nc", output_dir);
+  sprintf(ou_file, "%s/media_px0_pz0.nc", output_dir);
   
   // read in nc
   int ncid;
