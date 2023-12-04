@@ -17,8 +17,8 @@ id=1;
 
 % variable and time to plot
 varnm='Vx';
-ns=100;
-ne=2400;
+ns=2000;
+ne=5000;
 nt=100;
 
 % scl_caxis=[-50.0 50.0];

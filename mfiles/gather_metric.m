@@ -1,7 +1,7 @@
 function [v] = gather_metric(output_dir,varnm,subs,subc,subt)
 
 % load
-fnm_metric=[output_dir,'/','metric.nc'];
+fnm_metric=[output_dir,'/','metric_px0_pz0.nc'];
     
 if ~ exist(fnm_metric,'file')
    error([mfilename ': file ' fnm_metric 'does not exist']);

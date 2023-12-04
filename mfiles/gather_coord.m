@@ -1,7 +1,7 @@
 function [x,z] = gather_coord(output_dir,subs,subc,subt)
 
 % load
-fnm_coord=[output_dir,'/','coord.nc'];
+fnm_coord=[output_dir,'/','coord_px0_pz0.nc'];
     
 if ~ exist(fnm_coord,'file')
    error([mfilename ': file ' fnm_coord 'does not exist']);

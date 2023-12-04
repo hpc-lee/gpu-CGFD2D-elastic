@@ -1,7 +1,7 @@
 function [v] = gather_media(output_dir,varnm,subs,subc,subt)
 
 % load
-fnm_media=[output_dir,'/','media.nc'];
+fnm_media=[output_dir,'/','media_px0_pz0.nc'];
     
 if ~ exist(fnm_media,'file')
    error([mfilename ': file ' fnm_media 'does not exist']);
