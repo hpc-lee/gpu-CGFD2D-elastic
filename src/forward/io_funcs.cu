@@ -73,12 +73,14 @@ io_recv_read_locate(gd_t *gd,
     // by grid index
     if (is_coord == 0)
     {
+      // minus 1, due to C start from 0
       // add ghosts, to local point
-      rx = rx + gd->fdx_nghosts;
-      rz = rz + gd->fdz_nghosts;
+      rx = rx-1+gd->fdx_nghosts;
       // if sz is relative to surface, convert to normal index
       if (is_depth == 1) {
         rz = gd->nk2 - rz + gd->fdz_nghosts;
+      } else {
+        rz = rz-1+gd->fdz_nghosts;
       }
 
       // do not take nearest value, but use smaller value

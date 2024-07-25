@@ -620,8 +620,9 @@ par_read_from_str(const char *str, par_t *par)
 
       if (subitem = cJSON_GetObjectItem(lineitem, "grid_index_start"))
       {
+        // minus 1, due to C start from 0.
         for (int j = 0; j < CONST_NDIM; j++) {
-          par->receiver_line_index_start[i*CONST_NDIM+j] = cJSON_GetArrayItem(subitem, j)->valueint;
+          par->receiver_line_index_start[i*CONST_NDIM+j] = cJSON_GetArrayItem(subitem, j)->valueint-1;
         }
       }
 
@@ -680,8 +681,9 @@ par_read_from_str(const char *str, par_t *par)
 
       if (subitem = cJSON_GetObjectItem(snapitem, "grid_index_start"))
       {
+        // minus 1, due to C start from 0.
         for (int j = 0; j < CONST_NDIM; j++) {
-          par->snapshot_index_start[i*CONST_NDIM+j] = cJSON_GetArrayItem(subitem, j)->valueint;
+          par->snapshot_index_start[i*CONST_NDIM+j] = cJSON_GetArrayItem(subitem, j)->valueint-1;
         }
       }
 

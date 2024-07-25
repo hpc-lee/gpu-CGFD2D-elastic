@@ -145,7 +145,7 @@ cat << ieof > $PAR_FILE
   "snapshot" : [
     {
       "name" : "volume_vel",
-      "grid_index_start" : [ 0,   0 ],
+      "grid_index_start" : [ 1,   1 ],
       "grid_index_count" : [ ${NX}, ${NZ} ],
       "grid_index_incre" : [  1,  1 ],
       "time_index_start" : 0,
