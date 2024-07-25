@@ -31,11 +31,14 @@ io_recv_read_locate(gd_t *gd,
   FILE *fp;
   char line[500];
 
+  iorecv->total_number = 0;
   if (!(fp = fopen (in_filenm, "rt")))
 	{
-	    fprintf (stdout, "Cannot open input file %s\n", in_filenm);
-	    fflush (stdout);
-	    return 1;
+    fprintf(stdout,"#########         ########\n");
+    fprintf(stdout,"######### Warning ########\n");
+    fprintf(stdout,"#########         ########\n");
+	  fprintf (stdout, "Cannot open input station file %s\n", in_filenm);
+	  fflush (stdout);
 	}
 
   // number of station
@@ -149,7 +152,7 @@ io_recv_read_locate(gd_t *gd,
       fprintf(stdout,"#########         ########\n");
       fprintf(stdout,"######### Warning ########\n");
       fprintf(stdout,"#########         ########\n");
-      fprintf(stdout,"recv number %d physical coordinates are outside calculation area !\n",ir);
+      fprintf(stdout,"recv number %d physical coordinates are outside calculation area !\n",ir+1);
     }
   }
 
@@ -506,10 +509,7 @@ io_snap_nc_put(iosnap_t *iosnap,
                float * buff,
                int   nt_total,
                int   it,
-               float time,
-               int is_run_out_vel,     // for stg, out vel and stress at sep call
-               int is_run_out_stress,  // 
-               int is_incr_cur_it)     // for stg, should output cur_it once
+               float time)
 {
   int ierr = 0;
 
@@ -556,7 +556,7 @@ io_snap_nc_put(iosnap_t *iosnap,
       grid.y = (snap_nk+block.y-1)/block.y;
 
       // vel
-      if (is_run_out_vel == 1 && snap_out_V==1)
+      if (snap_out_V==1)
       {
         io_snap_pack_buff<<<grid, block>>> (w_end_d + wav->Vx_pos,
                  siz_iz,snap_i1,snap_ni,snap_di,
@@ -573,7 +573,7 @@ io_snap_nc_put(iosnap_t *iosnap,
               startp,countp,buff+1*siz_icmp);
       }
 
-      if (is_run_out_stress==1 && snap_out_T==1)
+      if (snap_out_T==1)
       {
         io_snap_pack_buff<<<grid, block>>> (w_end_d + wav->Txx_pos,
                  siz_iz,snap_i1,snap_ni,snap_di,
@@ -597,11 +597,11 @@ io_snap_nc_put(iosnap_t *iosnap,
               startp,countp,buff+4*siz_icmp);
       }
 
-      if (is_run_out_stress==1 && snap_out_E==1 &&
+      if (snap_out_E==1 &&
           md->medium_type == CONST_MEDIUM_ELASTIC_ISO)
       {
         // if snap_out_T==0, output T to calculate E
-        if (is_run_out_stress==1 && snap_out_T==0)
+        if (snap_out_T==0)
         {
           io_snap_pack_buff<<<grid, block>>> (w_end_d + wav->Txx_pos,
                    siz_iz,snap_i1,snap_ni,snap_di,
@@ -638,9 +638,7 @@ io_snap_nc_put(iosnap_t *iosnap,
 
       }
 
-      if (is_incr_cur_it == 1) {
-        iosnap_nc->cur_it[n] += 1;
-      }
+      iosnap_nc->cur_it[n] += 1;
 
       CUDACHECK(cudaFree(buff_d));
 
@@ -749,10 +747,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
                float * buff,
                int   nt_total,
                int   it,
-               float time,
-               int is_run_out_vel,     // for stg, out vel and stress at sep call
-               int is_run_out_stress,  // 
-               int is_incr_cur_it)     // for stg, should output cur_it once
+               float time)
 {
   int ierr = 0;
 
@@ -799,7 +794,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
       grid.y = (snap_nk+block.y-1)/block.y;
 
       // vel
-      if (is_run_out_vel == 1 && snap_out_V==1)
+      if (snap_out_V==1)
       {
         io_snap_pack_buff<<<grid, block>>> (w_end_d + wav->Vx_pos,
                  siz_iz,snap_i1,snap_ni,snap_di,
@@ -815,7 +810,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_V[n*CONST_NDIM+1],
               startp,countp,buff+1*siz_icmp);
       }
-      if (is_run_out_stress==1 && snap_out_T==1)
+      if (snap_out_T==1)
       {
         io_snap_pack_buff<<<grid, block>>> (w_end_d + wav->Txx_pos,
                  siz_iz,snap_i1,snap_ni,snap_di,
@@ -824,14 +819,12 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
         nc_put_vara_float(iosnap_nc->ncid[n],iosnap_nc->varid_T[n],
               startp,countp,buff+2*siz_icmp);
       }
-      if (is_run_out_stress==1 && snap_out_E==1)
+      if (snap_out_E==1)
       {
         // need to implement
       }
 
-      if (is_incr_cur_it == 1) {
-        iosnap_nc->cur_it[n] += 1;
-      }
+      iosnap_nc->cur_it[n] += 1;
 
     } // if it
   } // loop snap
@@ -892,7 +885,7 @@ io_snap_stress_to_strain_eliso(float *lam3d,
 {
   size_t iptr_snap=0;
   size_t i,k,iptr,iptr_k;
-  float lam,mu,E1,E2,E3,E0;
+  float lam,mu,E1,E2,E0;
 
   for (int n3=0; n3<countk; n3++)
   {
@@ -907,15 +900,14 @@ io_snap_stress_to_strain_eliso(float *lam3d,
       lam = lam3d[iptr];
       mu  =  mu3d[iptr];
       
-      E1 = (lam + mu) / (mu * ( 3.0 * lam + 2.0 * mu));
-      E2 = - lam / ( 2.0 * mu * (3.0 * lam + 2.0 * mu));
-      E3 = 1.0 / mu;
+      E1 = - lam / ( 2.0 * mu * (2.0 * lam + 2.0 * mu));
+      E2 = 0.5 / mu;
 
-      E0 = E2 * (Txx[iptr_snap] + Tzz[iptr_snap]);
+      E0 = E1 * (Txx[iptr_snap] + Tzz[iptr_snap]);
 
-      Exx[iptr_snap] = E0 - (E2 - E1) * Txx[iptr_snap];
-      Ezz[iptr_snap] = E0 - (E2 - E1) * Tzz[iptr_snap];
-      Exz[iptr_snap] = 0.5 * E3 * Txz[iptr_snap];
+      Exx[iptr_snap] = E0 - E2 * Txx[iptr_snap];
+      Ezz[iptr_snap] = E0 - E2 * Tzz[iptr_snap];
+      Exz[iptr_snap] = E2 * Txz[iptr_snap];
     } //i
   } //k
 

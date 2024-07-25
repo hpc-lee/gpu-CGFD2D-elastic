@@ -68,7 +68,6 @@ int media_layer2model_el_aniso(
         const char *in_lay_file,
         const char *equivalent_medium_method); 
 
-
 int AssignLayerMediaPara2Point(
     size_t ix, size_t iz,         /* To print Error messages */ 
     Point2 A,  

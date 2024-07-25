@@ -10,18 +10,18 @@ output_dir='../project/output'
 % which grid profile to plot
 subs=[1,1];     % start from index '1'
 subc=[-1,-1];   % '-1' to plot all points in this dimension
-subt=[1,1];
+subt=[2,2];
 
 % which snapshot to plot
 id=1;
 
 % variable and time to plot
-varnm='Vx';
-ns=2000;
-ne=5000;
-nt=100;
+varnm='Vz';
+ns=1;
+ne=100;
+nt=1;
 
-% scl_caxis=[-50.0 50.0];
+% scl_caxis=[-5.0 5.0]*1e-4;
 % read parameters file
 par=loadjson(parfnm);
 snap_subs=par.snapshot{1}.grid_index_start;
@@ -53,10 +53,10 @@ end
 flag_km     = 1;
 flag_emlast = 1;
 flag_print  = 0;
-savegif = 0;
+savegif = 1;
 
 
-filename1 = ['Vz2.gif'];
+filename1 = ['Vz.gif'];
 scl_daspect =[1 1 1];
 clrmp       = 'jetwr';
 taut=0.5;

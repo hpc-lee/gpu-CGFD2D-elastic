@@ -1,8 +1,0 @@
-event_3force_ricker
-1
-0 2
-2 0
-0 0
-100.0 200.0
-0.0 ricker_deriv 4 0.5 0 0 0 0 0 0 0 0
-1.0e12 0 0

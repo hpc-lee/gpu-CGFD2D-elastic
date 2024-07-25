@@ -33,9 +33,9 @@ mkdir -p $MEDIA_DIR
 #----------------------------------------------------------------------
 
 #-- total x grid points
-NX=197
+NX=801
 #-- total z grid points
-NZ=201
+NZ=401
 #----------------------------------------------------------------------
 #-- create main conf
 #----------------------------------------------------------------------
@@ -44,26 +44,26 @@ cat << ieof > $PAR_FILE
   "number_of_total_grid_points_x" : ${NX},
   "number_of_total_grid_points_z" : ${NZ},
 
-  "size_of_time_step" : 0.001,
-  "number_of_time_steps" : 10000,
-  "#time_window_length" : 2,
+  "#size_of_time_step" : 0.00005,
+  "#number_of_time_steps" : 10000,
+  "time_window_length" : 0.5,
   "check_stability" : 1,
 
   "boundary_x_left" : {
       "ablexp" : {
-          "number_of_layers" : 20,
+          "number_of_layers" : 50,
           "ref_vel"  : 7000.0
           }
       },
   "boundary_x_right" : {
       "ablexp" : {
-          "number_of_layers" : 20,
+          "number_of_layers" : 50,
           "ref_vel"  : 7000.0
           }
       },
   "boundary_z_bottom" : {
       "ablexp" : {
-          "number_of_layers" : 20,
+          "number_of_layers" : 50,
           "ref_vel"  : 7000.0
           }
       },
@@ -72,10 +72,10 @@ cat << ieof > $PAR_FILE
       },
 
   "grid_generation_method" : {
-      "#import" : "$GRID_DIR",
-      "cartesian" : {
-        "origin"  : [0.0, -29900.0 ],
-        "inteval" : [ 100.0, 100.0 ]
+      "import" : "$INPUTDIR/grid2",
+      "#cartesian" : {
+        "origin"  : [0.0, -400.0 ],
+        "inteval" : [ 1.0, 1.0 ]
       }
   },
   "is_export_grid" : 1,
@@ -119,15 +119,15 @@ cat << ieof > $PAR_FILE
       "Qs_freq" : 1.0
   },
 
-  "in_source_file" : "$INPUTDIR/prep_source/test_source.src",
+  "in_source_file" : "$INPUTDIR/test_source.src",
   "is_export_source" : 1,
   "source_export_dir"  : "$SOURCE_DIR",
 
   "output_dir" : "$OUTPUT_DIR",
 
-  "in_station_file" : "$INPUTDIR/prep_station/station.list",
+  "in_station_file" : "$INPUTDIR/station.list",
 
-  "receiver_line" : [
+  "#receiver_line" : [
     {
       "name" : "line_x_1",
       "grid_index_start"    : [  50, 59 ],
@@ -142,7 +142,7 @@ cat << ieof > $PAR_FILE
     } 
   ],
 
-  "snapshot" : [
+  "#snapshot" : [
     {
       "name" : "volume_vel",
       "grid_index_start" : [ 0,   0 ],
@@ -174,7 +174,7 @@ cat << ieof > ${PROJDIR}/cgfd_sim.sh
 set -e
 
 printf "\nStart simualtion ...\n";
-time $EXEC_WAVE $PAR_FILE 100 4 2>&1 |tee log
+time $EXEC_WAVE $PAR_FILE 100 3 2>&1 |tee log
 if [ $? -ne 0 ]; then
     printf "\nSimulation fail! stop!\n"
     exit 1

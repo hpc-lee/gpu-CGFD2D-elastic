@@ -4,8 +4,8 @@ clc;
 addmypath;
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project/test.json';
-output_dir='../project/output';
+parfnm='../project1/test.json';
+output_dir='../project1/output';
 
 % which line to plot (start from index '1')
 lineid=1;
@@ -14,7 +14,7 @@ lineid=1;
 recid=1;
 
 % which variable to plot
-varnm='Vz';
+varnm='Vx';
 
 % figure control parameters
 flag_print=0;
@@ -43,20 +43,20 @@ for irec=0:nrec-1
     
     sacnm=[output_dir,'/',lineprefix,'.',linenm,'.','no',num2str(irec),'.',varnm,'.sac'];
     sacdata=rsac(sacnm);
-    seismodata(irec+1,:)=sacdata(:,2);
+    seismodata(irec+1,:)=sacdata(:,2)/max(sacdata(:,2));
     seismot(irec+1,:)=sacdata(:,1);
     
 end
 
 
 % plot single receiver
-figure;
-plot(seismot(recid+1,:),seismodata(recid+1,:),'b','linewidth',1.0);
-xlabel('Time (s)');
-ylabel('Amplitude');
-title([varnm, ' at No.',num2str(recid+1),' Receiver of No.',num2str(lineid),...
-       ' Line ','(',linenm,')'],'interpreter','none');
-set(gcf,'color','white','renderer','painters');
+% figure(1);
+% plot(seismot(recid+1,:),seismodata(recid+1,:),'b','linewidth',1.0);
+% xlabel('Time (s)');
+% ylabel('Amplitude');
+% title([varnm, ' at No.',num2str(recid+1),' Receiver of No.',num2str(lineid),...
+%        ' Line ','(',linenm,')'],'interpreter','none');
+% set(gcf,'color','white','renderer','painters');
 
 % save and print figure
 if flag_print
@@ -74,7 +74,7 @@ end
 scl=max(max(abs(seismodata)));
 % increment of show for Y-axis ticklabel
 ytickincre=10;
-figure;
+figure(2);
 for irec=0:nrec-1
     plot(seismot(irec+1,:),seismodata(irec+1,:)+irec*(2*scl),'b');
     hold on;
@@ -97,5 +97,13 @@ if flag_print
     set(gcf,'paperposition',[0,0,width,height]);
     print(gcf,[varnm,'_line_no',num2str(lineid),'.png'],'-dpng');
 end
-    
 
+seismodata1 = seismodata;
+save("seismodata1.mat","seismodata1");
+seismot1 = seismot;
+save("seismot1.mat","seismot1");
+
+% seismodata2 = seismodata;
+% save("seismodata2.mat","seismodata2");
+% seismot2 = seismot;
+% save("seismot2.mat","seismot2");

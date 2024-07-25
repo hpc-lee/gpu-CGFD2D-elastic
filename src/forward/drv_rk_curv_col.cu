@@ -168,6 +168,26 @@ drv_rk_curv_col_allstep(
     t_cur  = it * dt + t0;
     t_end = t_cur +dt;
 
+    //--------------------------------------------
+    // save results
+    //--------------------------------------------
+
+    //-- recv by interp
+    io_recv_keep(iorecv, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
+
+    //-- line values
+    io_line_keep(ioline, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
+
+    // snapshot
+    if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
+      io_snap_nc_put_ac(iosnap, &iosnap_nc, gd, md, wav, 
+                     w_end_d, w_buff, nt_total, it, t_cur);
+    } else {
+      io_snap_nc_put(iosnap, &iosnap_nc, gd, md, wav, 
+                     w_end_d, w_buff, nt_total, it, t_cur);
+    }
+
+
     if (verbose>10) fprintf(stdout,"-> it=%d, t=%f\n", it, t_cur);
 
     // mod to get ipair
@@ -427,25 +447,6 @@ drv_rk_curv_col_allstep(
     //--------------------------------------------
     if (bdry_d.is_enable_ablexp == 1) {
        bdry_ablexp_apply(bdry_d, gd, w_end_d, wav->ncmp);
-    }
-
-    //--------------------------------------------
-    // save results
-    //--------------------------------------------
-
-    //-- recv by interp
-    io_recv_keep(iorecv, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
-
-    //-- line values
-    io_line_keep(ioline, w_end_d, w_buff, it, wav->ncmp, wav->siz_icmp);
-
-    // snapshot
-    if (md->medium_type == CONST_MEDIUM_ACOUSTIC_ISO) {
-      io_snap_nc_put_ac(iosnap, &iosnap_nc, gd, md, wav, 
-                     w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
-    } else {
-      io_snap_nc_put(iosnap, &iosnap_nc, gd, md, wav, 
-                     w_end_d, w_buff, nt_total, it, t_end, 1,1,1);
     }
 
     // swap w_pre and w_end, avoid copying

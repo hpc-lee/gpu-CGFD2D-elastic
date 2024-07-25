@@ -1088,3 +1088,50 @@ int checkGridData(int NL,
 
     return 0;
 }
+
+/* 
+ * Just read the grid data within the given
+ */
+int read_bin_file(
+    const char *bin_file,
+    float *var,
+    int dimx, 
+    int dimz,
+    int *bin_start, 
+    int *bin_end, 
+    int *bin_size, 
+    size_t bin_line) 
+{
+    FILE *fid = gfopen(bin_file, "rb");
+    std::vector<int> i(2, 0);
+
+    for (i[1] = 0; i[1] < bin_size[1]; i[1]++) {
+      for (i[0] = 0; i[0] < bin_size[0]; i[0]++) {
+        if (i[0] >= bin_start[0] && i[0] <= bin_end[0] &&
+            i[1] >= bin_start[1] && i[1] <= bin_end[1] )
+        {
+          size_t indx = (i[dimx] - bin_start[dimx]) + 
+                         i[dimz] * bin_line;
+
+          int u = fread(&var[indx], sizeof(float), 1, fid);
+          if (u < 1) {
+              fprintf(stderr,"Error: Insufficient data in %s.\n",bin_file);
+              fflush(stderr);
+              exit(1);
+          }
+        } else {
+          float tmp;
+          int u = fread(&tmp, sizeof(float), 1, fid);
+          if (u < 1) {
+              fprintf(stderr,"Error: Insufficient data in %s.\n",bin_file);
+              fflush(stderr);
+              exit(1);
+          }
+        }
+      }
+    }
+
+    fclose(fid);
+
+    return 0;
+}

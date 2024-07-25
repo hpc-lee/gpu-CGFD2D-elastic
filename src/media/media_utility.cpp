@@ -197,6 +197,80 @@ float LinearInterp(
     return vq;
 }
 
+/* 
+ * TrilinearInterpolate to the (xq, zq) point 
+ * It's just for the problum: (x,y) is a grid and the x, y vector are increment 
+ * Just for bin2model, 
+ */
+float TrilinearInterpolation(
+    std::vector<float> &x, 
+    std::vector<float> &z, 
+    float *v,
+    float xq,
+    float zq)
+{    
+    float vq;
+    int nx = x.size();
+    int nz = z.size();
+    float dx = x[1]-x[0];
+    float dz = z[1]-z[0];
+
+//    int ix0 = xq <= x[0]? 0:floor((xq-x[0])/dx); 
+//    int iy0 = yq <= y[0]? 0:floor((yq-y[0])/dy);
+//    int ix2 = xq >= x[nx-1]? nx-1:ceil((xq-x[0])/dx); 
+//    int iy2 = yq >= y[ny-1]? ny-1:ceil((yq-y[0])/dy);
+    int ix0 = floor((xq-x[0])/dx); 
+    int ix2 = ceil((xq-x[0])/dx); 
+    // out of bound, or every bound
+    ix0 = ix0 < 0 ? 0:ix0;
+    ix2 = ix2 < 0 ? 0:ix2;
+    ix0 = ix0 > nx-1 ? nx-1:ix0;
+    ix2 = ix2 > nx-1 ? nx-1:ix2;
+
+    // z can be increasing or descreasing
+    int iz0 = floor((zq-z[0])/dz);
+    int iz2 = ceil((zq-z[0])/dz);
+    // judge out of bound by 
+    iz0 = iz0 < 0 ? 0:iz0;
+    iz0 = iz0 > nz-1?nz-1:iz0;
+    iz2 = iz2 > nz-1?nz-1:iz2;
+    iz2 = iz2 < 0 ? 0:iz2;
+
+    size_t siz_line = nx;
+
+    // at the point
+    if (ix0 == ix2 && iz0 == iz2) {
+      return v[ix0 + iz0*siz_line];
+    }
+
+    // interp in every direction, can reduce judgement
+    float v00 = v[ix0 + iz0*siz_line];
+    float v02 = v[ix0 + iz2*siz_line];
+    float v20 = v[ix2 + iz0*siz_line];
+    float v22 = v[ix2 + iz2*siz_line];
+    //- xdir
+    float v10, v12;
+    // xq = x[i]
+    if (ix0 == ix2) {
+        v10 = v00;
+        v12 = v02;
+    } else {
+        float w = (xq-x[ix0])/(x[ix2]-x[ix0]);
+        v10 = v00 + w * (v20-v00);
+        v12 = v02 + w * (v22-v02);
+    }
+      
+    // z-dir
+    float v11;
+    if (iz0 == iz2) {
+        v11 = v10;
+    } else {
+        v11 = v10 + (zq-z[iz0])/(z[iz2]-z[iz0]) * (v12-v10); 
+    }
+
+    return v11;
+}
+
 //============== for matrix: just used in bond transform ===============
 // construct: init
 template<typename T>

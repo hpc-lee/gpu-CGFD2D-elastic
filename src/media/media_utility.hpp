@@ -224,6 +224,13 @@ float LinearInterp(
     const float *v,
     float xq);
 
+float TrilinearInterpolation(
+    std::vector<float> &x, 
+    std::vector<float> &z, 
+    float *v,
+    float xq,
+    float zq);
+
 /*---- matrix: just for Bond transform ----*/
 template <typename T>
 class Matrix;

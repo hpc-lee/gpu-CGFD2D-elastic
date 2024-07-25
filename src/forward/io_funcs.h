@@ -144,10 +144,7 @@ io_snap_nc_put(iosnap_t *iosnap,
                float * buff,
                int   nt_total,
                int   it,
-               float time,
-               int is_run_out_vel,     // for stg, out vel and stress at sep call
-               int is_run_out_stress,  // 
-               int is_incr_cur_it);     // for stg, should output cur_it once
+               float time);
 
 int
 io_snap_nc_create_ac(iosnap_t *iosnap, iosnap_nc_t *iosnap_nc);
@@ -162,10 +159,7 @@ io_snap_nc_put_ac(iosnap_t *iosnap,
                float * buff,
                int   nt_total,
                int   it,
-               float time,
-               int is_run_out_vel,     // for stg, out vel and stress at sep call
-               int is_run_out_stress,  // 
-               int is_incr_cur_it);     // for stg, should output cur_it once
+               float time);
 
 __global__ void
 io_snap_pack_buff(float * var,

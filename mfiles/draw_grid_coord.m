@@ -5,8 +5,8 @@ addmypath
 
 % -------------------------- parameters input -------------------------- %
 % file and path name
-parfnm='../project1/test.json';
-output_dir='../project1/output';
+parfnm='../project21/test.json';
+output_dir='../project21/output';
 
 % which grid profile to plot
 subs=[1,1];     % start from index '1'
@@ -14,10 +14,10 @@ subc=[-1,-1];   % '-1' to plot all points in this dimension
 subt=[1,1];
 
 % figure control parameters
-flag_km     = 1;
+flag_km     = 0;
 flag_emlast = 1;
 flag_print  = 0;
-flag_title  = 1;
+flag_title  = 0;
 scl_daspect = [1 1 1];
 %-----------------------------------------------------------
 %-- load coord
@@ -26,7 +26,6 @@ scl_daspect = [1 1 1];
 [x,z]=gather_coord(output_dir,subs,subc,subt);
 
 %- set coord unit
-flag_km     = 1;
 if flag_km
    x=x/1e3;
    z=z/1e3;
@@ -45,8 +44,8 @@ plot(x,z,'r-');
 hold on
 plot(x',z','r-');
   
-xlabel(['X axis (' str_unit ')']);
-ylabel(['Z axis (' str_unit ')']);
+xlabel(['X axis (' str_unit ')'],FontSize=35);
+ylabel(['Y axis (' str_unit ')'],FontSize=35);
   
 set(gca,'layer','top');
 set(gcf,'color','white','renderer','painters');
@@ -59,17 +58,14 @@ axis tight;
 
 % title
 if flag_title
-        gridtitle='XOZ-Grid';
+    gridtitle='XOZ-Grid';
     title(gridtitle);
 end
 
+set(gca,'FontSize',20);
+% set(gcf,'position',[0,0,1920,1200]);
+
+
+% print(gcf,['grid_model4.png'],'-r300','-dpng');
 % save and print figure
-if flag_print
-    width= 500;
-    height=500;
-    set(gcf,'paperpositionmode','manual');
-    set(gcf,'paperunits','points');
-    set(gcf,'papersize',[width,height]);
-    set(gcf,'paperposition',[0,0,width,height]);
-    print(gcf,[gridtitle '4.png'],'-dpng');
-end
+

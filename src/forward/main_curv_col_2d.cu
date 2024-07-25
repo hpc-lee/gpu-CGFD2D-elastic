@@ -1,9 +1,5 @@
 /*******************************************************************************
  * Curvilinear Grid Finite Difference 2D Wave Propagation Simulation 
- *
- * Copyright (c) 2021 ZHANG Wei. All rights reserved.
- *
- * Author(s): ZHANG Wei <zhangwei@sustech.edu.cn>
  ******************************************************************************/
 
 #include <stdio.h>
@@ -308,6 +304,29 @@ int main(int argc, char** argv)
                 MEDIA_USE_CURV,
                 par->media_input_file,
                 par->equivalent_medium_method);
+      }
+
+      break;
+    }
+
+    case PAR_MEDIA_2BIN : {
+
+      if (verbose==0) fprintf(stdout,"read and descretize 2D bin medium file ...\n"); 
+
+      if (md->medium_type == CONST_MEDIUM_ELASTIC_ISO)
+      {
+          media_bin2model_el_iso(md->rho,md->lambda, md->mu, 
+                                 gdcurv->x2d, gdcurv->z2d,
+                                 gdcurv->nx, gdcurv->nz,
+                                 gdcurv->xmin,gdcurv->xmax,
+                                 MEDIA_USE_CURV,
+                                 par->bin_order,
+                                 par->bin_size,
+                                 par->bin_spacing,
+                                 par->bin_origin,
+                                 par->bin_file_rho,
+                                 par->bin_file_vp,
+                                 par->bin_file_vs);
       }
 
       break;

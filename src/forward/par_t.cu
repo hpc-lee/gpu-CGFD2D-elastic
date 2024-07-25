@@ -385,6 +385,124 @@ par_read_from_str(const char *str, par_t *par)
           sprintf(par->media_input_file, "%s", subitem->valuestring);
       }
     }
+    if (strcmp(par->media_input_way,"binfile") == 0)
+    {
+      par->media_input_itype = PAR_MEDIA_2BIN;
+      if (subitem = cJSON_GetObjectItem(item, "binfile"))
+      {
+        // size
+        if (thirditem = cJSON_GetObjectItem(subitem, "size")) {
+          for (int i = 0; i < CONST_NDIM; i++) {
+            par->bin_size[i] = cJSON_GetArrayItem(thirditem, i)->valueint;
+          }
+        }
+        // spacing
+        if (thirditem = cJSON_GetObjectItem(subitem, "spacing")) {
+          for (int i = 0; i < CONST_NDIM; i++) {
+            par->bin_spacing[i] = cJSON_GetArrayItem(thirditem, i)->valuedouble;
+          }
+        }
+        // origin
+        if (thirditem = cJSON_GetObjectItem(subitem, "origin")) {
+          for (int i = 0; i < CONST_NDIM; i++) {
+            par->bin_origin[i] = cJSON_GetArrayItem(thirditem, i)->valuedouble;
+          }
+        }
+        // dim1
+        if (thirditem = cJSON_GetObjectItem(subitem, "dim1"))
+        {
+          sprintf(par->bin_dim1_name, "%s", thirditem->valuestring);
+          if (strcmp(par->bin_dim1_name,"x")==0) {
+            par->bin_order[0] = 0;
+          } else if (strcmp(par->bin_dim1_name,"z")==0) {
+            par->bin_order[0] = 1;
+          }
+        }
+        // dim2
+        if (thirditem = cJSON_GetObjectItem(subitem, "dim2"))
+        {
+          sprintf(par->bin_dim2_name, "%s", thirditem->valuestring);
+          if (strcmp(par->bin_dim2_name,"x")==0) {
+            par->bin_order[1] = 0;
+          } else if (strcmp(par->bin_dim2_name,"z")==0) {
+            par->bin_order[1] = 1;
+          }
+        }
+
+        // rho file
+        if (thirditem = cJSON_GetObjectItem(subitem, "rho"))
+        {
+          sprintf(par->bin_file_rho, "%s", thirditem->valuestring);
+        }
+        // Vp file
+        if (thirditem = cJSON_GetObjectItem(subitem, "Vp"))
+        {
+          sprintf(par->bin_file_vp, "%s", thirditem->valuestring);
+        }
+        // Vs file
+        if (thirditem = cJSON_GetObjectItem(subitem, "Vs"))
+        {
+          sprintf(par->bin_file_vs, "%s", thirditem->valuestring);
+        }
+        // epsilon file
+        if (thirditem = cJSON_GetObjectItem(subitem, "epsilon"))
+        {
+          sprintf(par->bin_file_epsilon, "%s", thirditem->valuestring);
+        }
+        // delta file
+        if (thirditem = cJSON_GetObjectItem(subitem, "delta"))
+        {
+          sprintf(par->bin_file_delta, "%s", thirditem->valuestring);
+        }
+        // gamma file
+        if (thirditem = cJSON_GetObjectItem(subitem, "gamma"))
+        {
+          sprintf(par->bin_file_gamma, "%s", thirditem->valuestring);
+        }
+        // c11 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c11"))
+        {
+          sprintf(par->bin_file_c11, "%s", thirditem->valuestring);
+        }
+        // c13 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c13"))
+        {
+          sprintf(par->bin_file_c13, "%s", thirditem->valuestring);
+        }
+        // c15 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c15"))
+        {
+          sprintf(par->bin_file_c15, "%s", thirditem->valuestring);
+        }
+        // c33 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c33"))
+        {
+          sprintf(par->bin_file_c33, "%s", thirditem->valuestring);
+        }
+        // c35 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c35"))
+        {
+          sprintf(par->bin_file_c35, "%s", thirditem->valuestring);
+        }
+        // c55 file
+        if (thirditem = cJSON_GetObjectItem(subitem, "c55"))
+        {
+          sprintf(par->bin_file_c55, "%s", thirditem->valuestring);
+        }
+        // Qp file
+        if (thirditem = cJSON_GetObjectItem(subitem, "Qp"))
+        {
+          sprintf(par->bin_file_Qp, "%s", thirditem->valuestring);
+        }
+        // Qs file
+        if (thirditem = cJSON_GetObjectItem(subitem, "Qs"))
+        {
+          sprintf(par->bin_file_Qs, "%s", thirditem->valuestring);
+        }
+        // need to add other model parameters
+
+      } // find binfile
+    } // if binfile
 
     if (subitem = cJSON_GetObjectItem(item, "equivalent_medium_method")) {
         sprintf(par->equivalent_medium_method, "%s", subitem->valuestring);
@@ -407,16 +525,30 @@ par_read_from_str(const char *str, par_t *par)
   par->visco_itype = 0;
   if (item = cJSON_GetObjectItem(root, "visco_config")) {
     if (subitem = cJSON_GetObjectItem(item, "type")) {
-        sprintf(par->visco_type, "%s", subitem->valuestring);
-        if (strcmp(par->visco_type, "graves_Qs")==0) {
-          par->visco_itype = CONST_VISCO_GRAVES_QS;
-        } else {
-          fprintf(stderr,"ERROR: visco_type is unknown\n");
-          exit(1);
-        }
+      sprintf(par->visco_type, "%s", subitem->valuestring);
+      if (strcmp(par->visco_type, "graves_Qs")==0) {
+        par->visco_itype = CONST_VISCO_GRAVES_QS;
+      }else if (strcmp(par->visco_type, "gmb")==0) {
+        par->visco_itype = CONST_VISCO_GMB;
+      } else {
+        fprintf(stderr,"ERROR: visco_type is unknown\n");
+        exit(1);
+      }
     }
     if (subitem = cJSON_GetObjectItem(item, "Qs_freq")) {
         par->visco_Qs_freq = subitem->valuedouble;
+    }
+    if (subitem = cJSON_GetObjectItem(item, "number_of_maxwell")) {
+        par->nmaxwell = subitem->valueint;
+    }
+    if (subitem = cJSON_GetObjectItem(item, "max_freq")) {
+        par->fmax = subitem->valuedouble;
+    }
+    if (subitem = cJSON_GetObjectItem(item, "min_freq")) {
+        par->fmin = subitem->valuedouble;
+    }
+    if (subitem = cJSON_GetObjectItem(item, "refer_freq")) {
+        par->fr = subitem->valuedouble;
     }
   }
 
